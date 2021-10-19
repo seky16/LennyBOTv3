@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -39,6 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
+    <PackageReference Include="FixerSharp" Version="1.2.2" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.55.0.2449" />
   </ItemGroup>
 </Project>

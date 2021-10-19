@@ -1,4 +1,7 @@
-﻿using LennyBOTv3.Settings;
+﻿using System.Globalization;
+using Google.Apis.YouTube.v3;
+using LennyBOTv3.Services;
+using LennyBOTv3.Settings;
 
 namespace LennyBOTv3
 {
@@ -6,6 +9,14 @@ namespace LennyBOTv3
     {
         static async Task<int> Main(string[] args)
         {
+            #region Culture
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+            #endregion
             using var host = CreateHostBuilder(args).Build();
             var logger = host.Services.GetRequiredService<ILogger<IHost>>();
 
@@ -31,13 +42,19 @@ namespace LennyBOTv3
             })
             .ConfigureServices((context, services) =>
             {
-                // services
-                services.AddHostedService<Bot>();
-
                 // configuration
                 var configurationRoot = context.Configuration;
                 services.AddOptions<DiscordSettings>().Bind(configurationRoot.GetSection(DiscordSettings.SectionKey)).ValidateDataAnnotations();
-                //services.AddOptions<OutputOptions>().Bind(configurationRoot.GetSection(OutputOptions.SectionKey)).ValidateDataAnnotations();
+                services.AddOptions<ApiSettings>().Bind(configurationRoot.GetSection(ApiSettings.SectionKey)).ValidateDataAnnotations();
+                ApiSettings apiSettings = new();
+                configurationRoot.GetSection(ApiSettings.SectionKey).Bind(apiSettings);
+
+                // services
+                services.AddHostedService<Bot>();
+                services.AddSingleton<Random>();
+                services.AddSingleton<SearchService>();
+                services.AddSingleton(new YouTubeService(new() { ApiKey = apiSettings.YouTubeApiKey, ApplicationName = "LennyBOT" }));
+                FixerSharp.Fixer.SetApiKey(apiSettings.FixerSharpApiKey);
             });
     }
 }
