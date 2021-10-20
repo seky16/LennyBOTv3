@@ -60,5 +60,23 @@ namespace LennyBOTv3
             result.EnsureSuccessStatusCode();
             return await result.Content.ReadAsStringAsync();
         }
+
+        /// <summary>
+        /// Calculates score as a lower bound of Wilson score confidence interval for a Bernoulli parameter
+        /// </summary>
+        /// <param name="upvotes"></param>
+        /// <param name="downvotes"></param>
+        /// <returns></returns>
+        /// <remarks><para>https://www.evanmiller.org/how-not-to-sort-by-average-rating.html</para><para>https://github.com/alextanhongpin/go-rate</para></remarks>
+        public static double WilsonRating(long upvotes, long downvotes)
+        {
+            if (upvotes == 0)
+                return -WilsonRating(downvotes, upvotes);
+
+            double n = upvotes + downvotes;
+            var pHat = upvotes / n;
+            var z = 1.96; // 0.95 confidentiality
+            return (pHat + z * z / (2 * n) - z * Math.Sqrt((pHat * (1 - pHat) + z * z / (4 * n)) / n)) / (1 + z * z / n);
+        }
     }
 }

@@ -36,6 +36,7 @@ namespace LennyBOTv3
                 AckPaginationButtons = true,
                 ButtonBehavior = ButtonPaginationBehavior.Disable,
                 PaginationBehaviour = PaginationBehaviour.Ignore,
+                Timeout = TimeSpan.FromMinutes(5),
             });
             var commands = _discordClient.UseCommandsNext(new()
             {

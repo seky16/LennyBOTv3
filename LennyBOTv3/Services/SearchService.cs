@@ -32,7 +32,7 @@ namespace LennyBOTv3.Services
                 throw new HttpRequestException($"UrbanDictionary did not return any result", null, HttpStatusCode.BadRequest);
 
             var pages = new List<DiscordEmbedBuilder>();
-            foreach (var item in model.List.Where(i=>i is not null).OrderByDescending(x => x?.ThumbsUp-x?.ThumbsDown))
+            foreach (var item in model.List.Where(i => i is not null).OrderByDescending(x => Helpers.WilsonRating(x!.ThumbsUp ?? 0, x.ThumbsDown ?? 0)))
             {
                 var desc = new StringBuilder(item!.Definition?.Replace("[", "").Replace("]", ""));
                 if (!string.IsNullOrEmpty(item.Example))
