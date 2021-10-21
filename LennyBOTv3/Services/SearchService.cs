@@ -6,21 +6,50 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using Google.Apis.YouTube.v3;
 using LennyBOTv3.Models;
+using LennyBOTv3.Settings;
+using Microsoft.Extensions.Options;
+using OMDbApiNet;
 
 namespace LennyBOTv3.Services
 {
     public class SearchService
     {
+        private readonly AsyncOmdbClient _omdb;
         private readonly YouTubeService _youTube;
 
-        public SearchService(YouTubeService youTube)
+        public SearchService(AsyncOmdbClient omdb,YouTubeService youTube)
         {
+            _omdb = omdb;
             _youTube = youTube;
         }
 
-        internal Task<IEnumerable<DiscordEmbedBuilder>> ImdbAsync(string query)
+        internal async Task<IEnumerable<DiscordEmbedBuilder>> ImdbAsync(string query)
         {
-            throw new NotImplementedException();
+            var list = await _omdb.GetSearchListAsync(query);
+            if (!string.IsNullOrEmpty(list.Error))
+                throw new HttpRequestException($"OmdbApi returned an error: {list.Error}");
+
+            if (list.SearchResults.Count == 0)
+                throw new HttpRequestException("OmdbApi did not return any result");
+
+            var pages = new List<DiscordEmbedBuilder>();
+            foreach (var result in list.SearchResults)
+            {
+                var item = await _omdb.GetItemByIdAsync(result.ImdbId);
+                pages.Add(new DiscordEmbedBuilder()
+                    .WithAuthor("IMDb", "https://www.imdb.com/", "http://files.softicons.com/download/social-media-icons/flat-gradient-social-icons-by-guilherme-lima/png/512x512/IMDb.png")
+                    .WithColor(DiscordColor.Goldenrod)
+                    .WithTitle($"{item.Title} ({item.Year})")
+                    .WithDescription($"{item.Plot} ({item.Runtime})")
+                    .WithUrl($"https://www.imdb.com/title/{ item.ImdbId}")
+                    .WithImageUrl(item.Poster)
+                    .AddField("Rating", $"{item.ImdbRating}\nMetascore: {item.Metascore}")
+                    .AddField("Info", $"Director: {item.Director}\nWriter: {item.Writer}\nCast: {item.Actors}\nGenre: {item.Genre}\nCountry: {item.Country}")
+                    .AddField("Release dates", $"Released: {item.Released}\nDVD: {item.Dvd}", true)
+                    .AddField("Trivia", $"Box office: {item.BoxOffice}\nAwards: {item.Awards}"));
+            }
+
+            return pages;
         }
 
         internal async Task<IEnumerable<DiscordEmbedBuilder>> UrbanDictionaryAsync(CommandContext ctx, string query)
@@ -29,7 +58,7 @@ namespace LennyBOTv3.Services
             var model = await Helpers.GetFromJsonAsync<UrbanDictionaryModel>($"http://api.urbandictionary.com/v0/define?term={query}");
 
             if (model?.List is null || model.List.Count == 0)
-                throw new HttpRequestException($"UrbanDictionary did not return any result", null, HttpStatusCode.BadRequest);
+                throw new HttpRequestException("UrbanDictionary did not return any result", null, HttpStatusCode.BadRequest);
 
             var pages = new List<DiscordEmbedBuilder>();
             foreach (var item in model.List.Where(i => i is not null).OrderByDescending(x => Helpers.WilsonRating(x!.ThumbsUp ?? 0, x.ThumbsDown ?? 0)))

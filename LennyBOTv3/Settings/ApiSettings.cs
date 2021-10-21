@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace LennyBOTv3.Settings
 {
-    internal record ApiSettings
+    public record ApiSettings
     {
         public static string SectionKey => nameof(ApiSettings);
 
@@ -12,5 +12,8 @@ namespace LennyBOTv3.Settings
 
         [Required, NotNull]
         public string? YouTubeApiKey { get; set; }
+
+        [Required, NotNull]
+        public string? OmdbApiKey { get; set; }
     }
 }

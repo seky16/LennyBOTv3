@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using Google.Apis.YouTube.v3;
 using LennyBOTv3.Services;
 using LennyBOTv3.Settings;
 
@@ -53,7 +52,8 @@ namespace LennyBOTv3
                 services.AddHostedService<Bot>();
                 services.AddSingleton<Random>();
                 services.AddSingleton<SearchService>();
-                services.AddSingleton(new YouTubeService(new() { ApiKey = apiSettings.YouTubeApiKey, ApplicationName = "LennyBOT" }));
+                services.AddSingleton(new Google.Apis.YouTube.v3.YouTubeService(new() { ApiKey = apiSettings.YouTubeApiKey, ApplicationName = "LennyBOT" }));
+                services.AddSingleton(new OMDbApiNet.AsyncOmdbClient(apiSettings.OmdbApiKey, true));
                 FixerSharp.Fixer.SetApiKey(apiSettings.FixerSharpApiKey);
             });
     }
