@@ -14,11 +14,15 @@ namespace LennyBOTv3.Services
 {
     public class SearchService
     {
+        private readonly ApiSettings _apiSettings;
+        private readonly ILogger<SearchService> _logger;
         private readonly AsyncOmdbClient _omdb;
         private readonly YouTubeService _youTube;
 
-        public SearchService(AsyncOmdbClient omdb,YouTubeService youTube)
+        public SearchService(IOptions<ApiSettings> apiSettings, ILogger<SearchService> logger, AsyncOmdbClient omdb, YouTubeService youTube)
         {
+            _apiSettings = apiSettings.Value;
+            _logger = logger;
             _omdb = omdb;
             _youTube = youTube;
         }
@@ -27,10 +31,10 @@ namespace LennyBOTv3.Services
         {
             var list = await _omdb.GetSearchListAsync(query);
             if (!string.IsNullOrEmpty(list.Error))
-                throw new HttpRequestException($"OmdbApi returned an error: {list.Error}");
+                throw new HttpRequestException($"OmdbApi returned an error: {list.Error}", null, HttpStatusCode.BadRequest);
 
             if (list.SearchResults.Count == 0)
-                throw new HttpRequestException("OmdbApi did not return any result");
+                throw new HttpRequestException("OmdbApi did not return any result", null, HttpStatusCode.BadRequest);
 
             var pages = new List<DiscordEmbedBuilder>();
             foreach (var result in list.SearchResults)
@@ -79,9 +83,18 @@ namespace LennyBOTv3.Services
             return pages;
         }
 
-        internal Task<IEnumerable<DiscordEmbedBuilder>> WeatherAsync(string query)
+        internal async Task<IEnumerable<DiscordEmbedBuilder>> WeatherAsync(string query)
         {
-            throw new NotImplementedException();
+            var result = new List<DiscordEmbedBuilder?>()
+            {
+                await OpenWeatherMapAsync(query),
+                await WeatherstackAsync(query),
+            }.OfType<DiscordEmbedBuilder>();
+
+            if (!result.Any())
+                throw new HttpRequestException("Weather APIs returned no results", null, HttpStatusCode.BadRequest);
+
+            return result;
         }
 
         internal async Task<IEnumerable<DiscordEmbedBuilder>> WikipediaAsync(string query)
@@ -120,5 +133,69 @@ namespace LennyBOTv3.Services
 
             return $"https://www.youtube.com/watch?v={response.Items[0].Id.VideoId}";
         }
+
+
+        private async Task<DiscordEmbedBuilder?> OpenWeatherMapAsync(string location)
+        {
+            var apiKey = _apiSettings.OpenWeatherMapApiKey;
+            var model = await Helpers.GetFromXmlAsync<OpenWeatherMapModel>($"https://api.openweathermap.org/data/2.5/weather?appid={apiKey}&q={location}&units=metric&mode=xml");
+
+            if (model is null)
+                return null;
+
+            var updatedOnUtc = model.Lastupdate?.Value.Equals(default(DateTime)) ?? true ? DateTime.UtcNow : DateTime.SpecifyKind(model.Lastupdate.Value, DateTimeKind.Utc);
+
+            return new DiscordEmbedBuilder()
+                .WithTitle($"Weather in {model.City?.Name ?? location}, {model.City?.Country}")
+                .WithDescription($"{model.Temperature?.Value} °C (min: {model.Temperature?.Min} °C; max: {model.Temperature?.Max} °C) {model.Weather?.Value}")
+                .WithThumbnail($"https://openweathermap.org/img/wn/{model.Weather?.Icon}@2x.png")
+                //.WithFooter($"Last update: {Formatter.Timestamp(updatedOnUtc, TimestampFormat.ShortDateTime)}")
+                .WithAuthor("OpenWeather", "https://openweathermap.org/", "https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_60x60.png")
+                .AddField("More info",
+                $"Feels like: {model.FeelsLike?.Value} °C\n" +
+                $"Cloud coverage: {model.Clouds?.Value} % ({model.Clouds?.Name})\n" +
+                $"Precipitation: {model.Precipitation?.Value} mm\n" +
+                $"Humidity: {model.Humidity?.Value} {model.Humidity?.Unit}\n" +
+                $"Pressure: {model.Pressure?.Value} {model.Pressure?.Unit}\n" +
+                $"Wind: {model.Wind?.Speed?.Value} {model.Wind?.Speed?.Unit} {model.Wind?.Direction?.Code} ({model.Wind?.Speed?.Name})\n" +
+                $"Visibility: {model.Visibility?.Value / 1000.0} km\n" +
+                $"Sunrise/sunset: {model.City?.Sun?.Rise.AddSeconds(model.City?.Timezone ?? 0).TimeOfDay} / {model.City?.Sun?.Set.AddSeconds(model.City?.Timezone ?? 0).TimeOfDay} (local time)\n");
+        }
+
+        private async Task<DiscordEmbedBuilder?> WeatherstackAsync(string location)
+        {
+            var apiKey = _apiSettings.WeatherstackApiKey;
+
+            var model = await Helpers.GetFromJsonAsync<WeatherstackModel>($"http://api.weatherstack.com/current?access_key={apiKey}&query={location}").ConfigureAwait(false);
+
+            if (model?.Current is null || model.Location is null || !model.Success)
+            {
+                _logger.LogWarning("Weatherstack returned an error: {error}", model?.Error);
+                return null;
+            }
+
+            var updatedOnUtc = DateTimeOffset.UtcNow;
+            if (model.Location.LocaltimeEpoch.HasValue && model.Location.UtcOffset.HasValue)
+            {
+                updatedOnUtc = DateTimeOffset.FromUnixTimeSeconds(model.Location.LocaltimeEpoch.Value).AddHours(-model.Location.UtcOffset.Value);
+            }
+
+            return new DiscordEmbedBuilder()
+                .WithTitle($"Weather in {model.Location.Name}, {model.Location.Region}, {model.Location.Country}")
+                .WithDescription($"{model.Current.Temperature} °C {model.Current.WeatherDescriptions?.FirstOrDefault()}")
+                .WithThumbnail(model.Current.WeatherIcons?.FirstOrDefault())
+                //.WithFooter($"Last update: {Formatter.Timestamp(updatedOnUtc, TimestampFormat.ShortDateTime)}")
+                .WithAuthor("weatherstack", "https://weatherstack.com", "https://weatherstack.com/site_images/weatherstack_icon.png")
+                .AddField("More info",
+                $"Feels like: {model.Current.Feelslike} °C\n" +
+                $"Cloud coverage: {model.Current.Cloudcover} %\n" +
+                $"Precipitation: {model.Current.Precip} mm\n" +
+                $"Humidity: {model.Current.Humidity} %\n" +
+                $"Pressure: {model.Current.Pressure} mBar\n" +
+                $"Wind: {model.Current.WindSpeed} km/h {model.Current.WindDir}\n" +
+                $"Visibility: {model.Current.Visibility} km\n" +
+                $"UV Index: {model.Current.UVIndex}");
+        }
+
     }
 }

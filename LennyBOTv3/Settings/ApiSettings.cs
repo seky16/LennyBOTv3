@@ -11,9 +11,15 @@ namespace LennyBOTv3.Settings
         public string? FixerSharpApiKey { get; set; }
 
         [Required, NotNull]
-        public string? YouTubeApiKey { get; set; }
+        public string? OmdbApiKey { get; set; }
 
         [Required, NotNull]
-        public string? OmdbApiKey { get; set; }
+        public string? OpenWeatherMapApiKey { get; set; }
+
+        [Required, NotNull]
+        public string? WeatherstackApiKey { get; set; }
+
+        [Required, NotNull]
+        public string? YouTubeApiKey { get; set; }
     }
 }
