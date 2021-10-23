@@ -7,7 +7,12 @@ namespace LennyBOTv3.Modules
 {
     public class GeneralModule : LennyBaseModule
     {
-        public Random Random { private get; set; }
+        private readonly Random _random;
+
+        public GeneralModule(Random random)
+        {
+            _random = random;
+        }
 
         [Command("clap")]
         [Description("Join text with :clap: emote")]
@@ -29,7 +34,7 @@ namespace LennyBOTv3.Modules
             if (options.Length == 0)
                 throw new ArgumentException("Options cannot be empty", nameof(options));
 
-            await ctx.RespondAsync(options[Random.Next(options.Length)]);
+            await ctx.RespondAsync(options[_random.Next(options.Length)]);
         }
 
         [Command("ping")]
