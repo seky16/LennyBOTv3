@@ -6,34 +6,34 @@ namespace LennyBOTv3.Models
     public record City
     {
         [XmlElement(ElementName = "coord")]
-        public Coord? Coord { get; set; }
+        public Coord? Coord { get; init; }
 
         /// <summary>
         /// Country code (GB, JP etc.)
         /// </summary>
         [XmlElement(ElementName = "country")]
-        public string? Country { get; set; }
+        public string? Country { get; init; }
 
         /// <summary>
         /// City ID
         /// </summary>
         [XmlAttribute(AttributeName = "id")]
-        public int Id { get; set; }
+        public int Id { get; init; }
 
         /// <summary>
         ///  City name
         /// </summary>
         [XmlAttribute(AttributeName = "name")]
-        public string? Name { get; set; }
+        public string? Name { get; init; }
 
         [XmlElement(ElementName = "sun")]
-        public Sun? Sun { get; set; }
+        public Sun? Sun { get; init; }
 
         /// <summary>
         /// Shift in seconds from UTC
         /// </summary>
         [XmlElement(ElementName = "timezone")]
-        public int Timezone { get; set; }
+        public int Timezone { get; init; }
     }
 
     [XmlRoot(ElementName = "clouds")]
@@ -43,13 +43,13 @@ namespace LennyBOTv3.Models
         /// Name of the cloudiness
         /// </summary>
         [XmlAttribute(AttributeName = "name")]
-        public string? Name { get; set; }
+        public string? Name { get; init; }
 
         /// <summary>
         /// Cloudiness
         /// </summary>
         [XmlAttribute(AttributeName = "value")]
-        public int Value { get; set; }
+        public int Value { get; init; }
     }
 
     [XmlRoot(ElementName = "coord")]
@@ -59,13 +59,13 @@ namespace LennyBOTv3.Models
         /// City geo location, latitude
         /// </summary>
         [XmlAttribute(AttributeName = "lat")]
-        public double Lat { get; set; }
+        public double Lat { get; init; }
 
         /// <summary>
         /// City geo location, longitude
         /// </summary>
         [XmlAttribute(AttributeName = "lon")]
-        public double Lon { get; set; }
+        public double Lon { get; init; }
     }
 
     [XmlRoot(ElementName = "direction")]
@@ -75,19 +75,19 @@ namespace LennyBOTv3.Models
         ///  Code of the wind direction. Possible value is WSW, N, S etc.
         /// </summary>
         [XmlAttribute(AttributeName = "code")]
-        public string? Code { get; set; }
+        public string? Code { get; init; }
 
         /// <summary>
         /// Full name of the wind direction.
         /// </summary>
         [XmlAttribute(AttributeName = "name")]
-        public string? Name { get; set; }
+        public string? Name { get; init; }
 
         /// <summary>
         /// Wind direction, degrees (meteorological)
         /// </summary>
         [XmlAttribute(AttributeName = "value")]
-        public int Value { get; set; }
+        public int Value { get; init; }
     }
 
     [XmlRoot(ElementName = "feels_like")]
@@ -97,13 +97,13 @@ namespace LennyBOTv3.Models
         /// Unit of measurements. Possible value is Celsius, Kelvin, Fahrenheit. Unit Default: Kelvin
         /// </summary>
         [XmlAttribute(AttributeName = "unit")]
-        public string? Unit { get; set; }
+        public string? Unit { get; init; }
 
         /// <summary>
         /// Temperature. This temperature parameter accounts for the human perception of weather.
         /// </summary>
         [XmlAttribute(AttributeName = "value")]
-        public double Value { get; set; }
+        public double Value { get; init; }
     }
 
     [XmlRoot(ElementName = "gusts")]
@@ -113,7 +113,7 @@ namespace LennyBOTv3.Models
         /// Wind gust. Unit Default: meter/sec, Metric: meter/sec, Imperial: miles/hour
         /// </summary>
         [XmlAttribute(AttributeName = "value")]
-        public double Value { get; set; }
+        public double Value { get; init; }
     }
 
     [XmlRoot(ElementName = "humidity")]
@@ -123,13 +123,13 @@ namespace LennyBOTv3.Models
         /// Humidity units, %
         /// </summary>
         [XmlAttribute(AttributeName = "unit")]
-        public string? Unit { get; set; }
+        public string? Unit { get; init; }
 
         /// <summary>
         /// Humidity value
         /// </summary>
         [XmlAttribute(AttributeName = "value")]
-        public int Value { get; set; }
+        public int Value { get; init; }
     }
 
     [XmlRoot(ElementName = "lastupdate")]
@@ -139,44 +139,44 @@ namespace LennyBOTv3.Models
         /// Last time when data was updated
         /// </summary>
         [XmlAttribute(AttributeName = "value")]
-        public DateTime Value { get; set; }
+        public DateTime Value { get; init; }
     }
 
     [XmlRoot(ElementName = "current")]
     public record OpenWeatherMapModel
     {
         [XmlElement(ElementName = "city")]
-        public City? City { get; set; }
+        public City? City { get; init; }
 
         [XmlElement(ElementName = "clouds")]
-        public Clouds? Clouds { get; set; }
+        public Clouds? Clouds { get; init; }
 
         [XmlElement(ElementName = "feels_like")]
-        public FeelsLike? FeelsLike { get; set; }
+        public FeelsLike? FeelsLike { get; init; }
 
         [XmlElement(ElementName = "humidity")]
-        public Humidity? Humidity { get; set; }
+        public Humidity? Humidity { get; init; }
 
         [XmlElement(ElementName = "lastupdate")]
-        public Lastupdate? Lastupdate { get; set; }
+        public Lastupdate? Lastupdate { get; init; }
 
         [XmlElement(ElementName = "precipitation")]
-        public Precipitation? Precipitation { get; set; }
+        public Precipitation? Precipitation { get; init; }
 
         [XmlElement(ElementName = "pressure")]
-        public Pressure? Pressure { get; set; }
+        public Pressure? Pressure { get; init; }
 
         [XmlElement(ElementName = "temperature")]
-        public Temperature? Temperature { get; set; }
+        public Temperature? Temperature { get; init; }
 
         [XmlElement(ElementName = "visibility")]
-        public Visibility? Visibility { get; set; }
+        public Visibility? Visibility { get; init; }
 
         [XmlElement(ElementName = "weather")]
-        public Weather? Weather { get; set; }
+        public Weather? Weather { get; init; }
 
         [XmlElement(ElementName = "wind")]
-        public Wind? Wind { get; set; }
+        public Wind? Wind { get; init; }
     }
 
     [XmlRoot(ElementName = "precipitation")]
@@ -186,13 +186,13 @@ namespace LennyBOTv3.Models
         /// Possible values are 'no", name of weather phenomena as 'rain', 'snow'
         /// </summary>
         [XmlAttribute(AttributeName = "mode")]
-        public string? Mode { get; set; }
+        public string? Mode { get; init; }
 
         /// <summary>
         /// Precipitation, mm
         /// </summary>
         [XmlAttribute(AttributeName = "value")]
-        public int Value { get; set; }
+        public int Value { get; init; }
     }
 
     [XmlRoot(ElementName = "pressure")]
@@ -202,13 +202,13 @@ namespace LennyBOTv3.Models
         /// Pressure units, hPa
         /// </summary>
         [XmlAttribute(AttributeName = "unit")]
-        public string? Unit { get; set; }
+        public string? Unit { get; init; }
 
         /// <summary>
         /// Pressure value
         /// </summary>
         [XmlAttribute(AttributeName = "value")]
-        public int Value { get; set; }
+        public int Value { get; init; }
     }
 
     [XmlRoot(ElementName = "speed")]
@@ -218,19 +218,19 @@ namespace LennyBOTv3.Models
         /// Type of the wind
         /// </summary>
         [XmlAttribute(AttributeName = "name")]
-        public string? Name { get; set; }
+        public string? Name { get; init; }
 
         /// <summary>
         /// Wind speed units, m/s
         /// </summary>
         [XmlAttribute(AttributeName = "unit")]
-        public string? Unit { get; set; }
+        public string? Unit { get; init; }
 
         /// <summary>
         /// Wind speed
         /// </summary>
         [XmlAttribute(AttributeName = "value")]
-        public double Value { get; set; }
+        public double Value { get; init; }
     }
 
     [XmlRoot(ElementName = "sun")]
@@ -240,13 +240,13 @@ namespace LennyBOTv3.Models
         /// Sunrise time
         /// </summary>
         [XmlAttribute(AttributeName = "rise")]
-        public DateTime Rise { get; set; }
+        public DateTime Rise { get; init; }
 
         /// <summary>
         ///  Sunset time
         /// </summary>
         [XmlAttribute(AttributeName = "set")]
-        public DateTime Set { get; set; }
+        public DateTime Set { get; init; }
     }
 
     [XmlRoot(ElementName = "temperature")]
@@ -257,26 +257,26 @@ namespace LennyBOTv3.Models
         /// temperature (within large megalopolises and urban areas), use this parameter optionally.
         /// </summary>
         [XmlAttribute(AttributeName = "max")]
-        public double Max { get; set; }
+        public double Max { get; init; }
 
         /// <summary>
         /// Minimum temperature at the moment of calculation. This is minimal currently observed
         /// temperature (within large megalopolises and urban areas), use this parameter optionally.
         /// </summary>
         [XmlAttribute(AttributeName = "min")]
-        public double Min { get; set; }
+        public double Min { get; init; }
 
         /// <summary>
         /// Unit of measurements. Possible value is Celsius, Kelvin, Fahrenheit.
         /// </summary>
         [XmlAttribute(AttributeName = "unit")]
-        public string? Unit { get; set; }
+        public string? Unit { get; init; }
 
         /// <summary>
         /// Temperature
         /// </summary>
         [XmlAttribute(AttributeName = "value")]
-        public double Value { get; set; }
+        public double Value { get; init; }
     }
 
     [XmlRoot(ElementName = "visibility")]
@@ -286,7 +286,7 @@ namespace LennyBOTv3.Models
         /// Visibility, meter
         /// </summary>
         [XmlAttribute(AttributeName = "value")]
-        public int Value { get; set; }
+        public int Value { get; init; }
     }
 
     [XmlRoot(ElementName = "weather")]
@@ -296,31 +296,31 @@ namespace LennyBOTv3.Models
         /// Weather icon id
         /// </summary>
         [XmlAttribute(AttributeName = "icon")]
-        public string? Icon { get; set; }
+        public string? Icon { get; init; }
 
         /// <summary>
         /// Weather condition id
         /// </summary>
         [XmlAttribute(AttributeName = "number")]
-        public int Number { get; set; }
+        public int Number { get; init; }
 
         /// <summary>
         /// Weather condition name
         /// </summary>
         [XmlAttribute(AttributeName = "value")]
-        public string? Value { get; set; }
+        public string? Value { get; init; }
     }
 
     [XmlRoot(ElementName = "wind")]
     public record Wind
     {
         [XmlElement(ElementName = "direction")]
-        public Direction? Direction { get; set; }
+        public Direction? Direction { get; init; }
 
         [XmlElement(ElementName = "gusts")]
-        public Gusts? Gusts { get; set; }
+        public Gusts? Gusts { get; init; }
 
         [XmlElement(ElementName = "speed")]
-        public Speed? Speed { get; set; }
+        public Speed? Speed { get; init; }
     }
 }
