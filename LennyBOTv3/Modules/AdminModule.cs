@@ -1,4 +1,5 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using DSharpPlus;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
@@ -36,6 +37,14 @@ namespace LennyBOTv3.Modules
                 x.AuditLogReason = $"Edited by {ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             });
             await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":ok_hand:"));
+        }
+
+        [Command("sql"), Aliases("db")]
+        public async Task SqlAsync(CommandContext ctx,
+            [RemainingText,Description("")] string query)
+        {
+            var result = await Database.RunQuery(query);
+            await ctx.RespondAsync(Formatter.BlockCode(result, "json"));
         }
     }
 }

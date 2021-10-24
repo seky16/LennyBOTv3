@@ -1,5 +1,7 @@
-﻿using DSharpPlus.Entities;
+﻿using System.Text;
+using DSharpPlus.Entities;
 using LiteDB;
+using Newtonsoft.Json.Linq;
 
 namespace LennyBOTv3.Services
 {
@@ -23,10 +25,27 @@ namespace LennyBOTv3.Services
             base.Dispose();
         }
 
+        public Task<string> RunQuery(string query)
+        {
+            return Task.Run(() =>
+            {
+                var reader = _db.Execute(query);
+                var sb = new StringBuilder();
+
+                foreach (var item in reader.ToEnumerable())
+                {
+                    using var strWriter = new StringWriter(sb);
+                    var jsonWriter = new JsonWriter(strWriter) { Pretty = true, };
+                    jsonWriter.Serialize(item);
+                }
+                return sb.ToString();
+            });
+        }
+
         public Task<string?> GetUserLocationAsync(DiscordUser user)
             => Task.Run(() => _db.GetCollection("UserLocations").FindById(user.Id)?["location"].AsString);
 
         public Task SetUserLocationAsync(DiscordUser user, string location)
-            => Task.Run(() => _db.GetCollection("UserLocations").Upsert(user.Id, new() { ["location"] = location }));
+            => Task.Run(() => _db.GetCollection("UserLocations").Upsert(user.Id, new() { ["user"] = $"{user.Username}#{user.Discriminator}", ["location"] = location, }));
     }
 }

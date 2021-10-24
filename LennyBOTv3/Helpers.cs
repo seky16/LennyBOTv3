@@ -78,5 +78,20 @@ namespace LennyBOTv3
             var z = 1.96; // 0.95 confidentiality
             return (pHat + z * z / (2 * n) - z * Math.Sqrt((pHat * (1 - pHat) + z * z / (4 * n)) / n)) / (1 + z * z / n);
         }
+
+        public class Shuffler<T> : IComparer<T>
+        {
+            private readonly Random _random;
+
+            public Shuffler(Random random)
+            {
+                _random = random;
+            }
+
+            public int Compare(T? x, T? y)
+            {
+                return _random.Next() - _random.Next();
+            }
+        }
     }
 }
