@@ -53,6 +53,7 @@ namespace LennyBOTv3
                 services.AddHostedService<DatabaseService>();
                 services.AddSingleton<Random>();
                 services.AddSingleton<SearchService>();
+                services.AddSingleton<RssService>();
                 services.AddSingleton(new Google.Apis.YouTube.v3.YouTubeService(new() { ApiKey = apiSettings.YouTubeApiKey, ApplicationName = "LennyBOT" }));
                 services.AddSingleton(new OMDbApiNet.AsyncOmdbClient(apiSettings.OmdbApiKey, true));
                 FixerSharp.Fixer.SetApiKey(apiSettings.FixerSharpApiKey);
