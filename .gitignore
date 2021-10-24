@@ -364,3 +364,4 @@ FodyWeavers.xsd
 
 # LennyBOTv3
 appsettings.Development.json
+*.db

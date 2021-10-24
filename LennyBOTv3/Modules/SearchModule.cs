@@ -1,5 +1,6 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 using LennyBOTv3.Services;
 
 namespace LennyBOTv3.Modules
@@ -30,6 +31,12 @@ namespace LennyBOTv3.Modules
         public async Task WeatherAsync(CommandContext ctx,
             [RemainingText, Description("")] string query)
             => await ctx.SendPaginatedMessageAsync(await _searchService.WeatherAsync(query));
+
+        [Command("weather"), Priority(1)]
+        [Description("")]
+        public async Task WeatherAsync(CommandContext ctx,
+            [RemainingText, Description("")] DiscordUser? user = null)
+            => await ctx.SendPaginatedMessageAsync(await _searchService.WeatherAsync(user ?? ctx.User));
 
         [Command("wiki"), Aliases("wikipedia")]
         [Description("")]

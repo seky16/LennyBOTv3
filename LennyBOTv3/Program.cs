@@ -4,7 +4,7 @@ using LennyBOTv3.Settings;
 
 namespace LennyBOTv3
 {
-    internal static class Program
+    public static class Program
     {
         static async Task<int> Main(string[] args)
         {
@@ -50,6 +50,7 @@ namespace LennyBOTv3
 
                 // services
                 services.AddHostedService<Bot>();
+                services.AddHostedService<DatabaseService>();
                 services.AddSingleton<Random>();
                 services.AddSingleton<SearchService>();
                 services.AddSingleton(new Google.Apis.YouTube.v3.YouTubeService(new() { ApiKey = apiSettings.YouTubeApiKey, ApplicationName = "LennyBOT" }));

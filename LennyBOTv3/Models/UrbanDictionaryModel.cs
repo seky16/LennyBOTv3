@@ -2,13 +2,13 @@
 
 namespace LennyBOTv3.Models
 {
-    internal record UrbanDictionaryModel
+    public record UrbanDictionaryModel
     {
         [JsonPropertyName("list")]
         public List<List?>? List { get; init; }
     }
 
-    internal record List
+    public record List
     {
         [JsonPropertyName("definition")]
         public string? Definition { get; init; }

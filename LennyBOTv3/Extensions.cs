@@ -57,5 +57,8 @@ namespace LennyBOTv3
                 return ctx.Channel.SendPaginatedMessageAsync(ctx.User, pages);
             }
         }
+
+        public static TService GetHostedService<TService>(this IServiceProvider serviceProvider) where TService : IHostedService
+            => serviceProvider.GetServices<IHostedService>().OfType<TService>().Single();
     }
 }

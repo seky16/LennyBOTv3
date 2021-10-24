@@ -8,7 +8,7 @@ namespace LennyBOTv3.Modules
     [Group("admin")]
     [Description("Commands for controlling the bot's behaviour.")]
     [RequireOwner, Hidden]
-    public sealed class AdministrationModule : BaseCommandModule
+    public sealed class AdministrationModule : LennyBaseModule
     {
         [Command("sudo"), Description("Executes a command as another user.")]
         public async Task SudoAsync(CommandContext ctx,

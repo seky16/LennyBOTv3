@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 
 namespace LennyBOTv3
 {
-    internal static class Helpers
+    public static class Helpers
     {
         /// <summary>
         /// Build safe (escaped) url using string interpolation

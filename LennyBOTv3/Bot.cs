@@ -13,32 +13,35 @@ using Microsoft.Extensions.Options;
 
 namespace LennyBOTv3
 {
-    internal class Bot : BackgroundService
+    public class Bot : BackgroundService
     {
         private readonly ILogger<Bot> _logger;
         private readonly DiscordSettings _discordSettings;
-        private readonly DiscordClient _discordClient;
+
+        public DiscordClient DiscordClient { get; }
 
         public Bot(ILoggerFactory loggerFactory, IOptions<DiscordSettings> discordSettings, IServiceProvider serviceProvider)
         {
             _logger = loggerFactory.CreateLogger<Bot>();
             _discordSettings = discordSettings.Value;
 
-            _discordClient = new DiscordClient(new()
+            DiscordClient = new DiscordClient(new()
             {
                 Token = _discordSettings.Token,
                 TokenType = TokenType.Bot,
                 Intents = DiscordIntents.All,
                 LoggerFactory = loggerFactory,
             });
-            var interactivity = _discordClient.UseInteractivity(new InteractivityConfiguration()
+
+            var interactivity = DiscordClient.UseInteractivity(new InteractivityConfiguration()
             {
                 AckPaginationButtons = true,
                 ButtonBehavior = ButtonPaginationBehavior.Disable,
                 PaginationBehaviour = PaginationBehaviour.Ignore,
                 Timeout = TimeSpan.FromMinutes(5),
             });
-            var commands = _discordClient.UseCommandsNext(new()
+
+            var commands = DiscordClient.UseCommandsNext(new()
             {
                 Services = serviceProvider,
                 StringPrefixes = new[] { _discordSettings.Prefix },
@@ -46,23 +49,23 @@ namespace LennyBOTv3
             commands.RegisterCommands(Assembly.GetExecutingAssembly());
 
             // events from https://github.com/Emzi0767/Discord-Companion-Cube-Bot/blob/master/Emzi0767.CompanionCube/CompanionCubeBot.cs
-            _discordClient.Ready += Discord_Ready;
-            _discordClient.GuildDownloadCompleted += Discord_GuildDownloadCompleted;
-            _discordClient.SocketErrored += Discord_SocketErrored;
-            _discordClient.GuildAvailable += Discord_GuildAvailable;
+            DiscordClient.Ready += Discord_Ready;
+            DiscordClient.GuildDownloadCompleted += Discord_GuildDownloadCompleted;
+            DiscordClient.SocketErrored += Discord_SocketErrored;
+            DiscordClient.GuildAvailable += Discord_GuildAvailable;
             commands.CommandExecuted += CommandsNext_CommandExecuted;
             commands.CommandErrored += CommandsNext_CommandErrored;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await _discordClient.ConnectAsync();
+            await DiscordClient.ConnectAsync();
         }
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
-            await _discordClient.DisconnectAsync();
-            _discordClient.Dispose();
+            await DiscordClient.DisconnectAsync();
+            DiscordClient.Dispose();
             await base.StopAsync(cancellationToken);
         }
 

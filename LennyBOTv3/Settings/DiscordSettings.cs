@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace LennyBOTv3.Settings
 {
-    internal record DiscordSettings
+    public record DiscordSettings
     {
         public static string SectionKey => nameof(DiscordSettings);
 

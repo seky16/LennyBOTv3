@@ -17,17 +17,19 @@ namespace LennyBOTv3.Services
         private readonly ApiSettings _apiSettings;
         private readonly ILogger<SearchService> _logger;
         private readonly AsyncOmdbClient _omdb;
+        private readonly IServiceProvider _serviceProvider;
         private readonly YouTubeService _youTube;
 
-        public SearchService(IOptions<ApiSettings> apiSettings, ILogger<SearchService> logger, AsyncOmdbClient omdb, YouTubeService youTube)
+        public SearchService(IServiceProvider serviceProvider)
         {
-            _apiSettings = apiSettings.Value;
-            _logger = logger;
-            _omdb = omdb;
-            _youTube = youTube;
+            _serviceProvider = serviceProvider;
+            _apiSettings = serviceProvider.GetRequiredService<IOptions<ApiSettings>>().Value;
+            _logger = serviceProvider.GetRequiredService<ILogger<SearchService>>();
+            _omdb = serviceProvider.GetRequiredService<AsyncOmdbClient>();
+            _youTube = serviceProvider.GetRequiredService<YouTubeService>();
         }
 
-        internal async Task<IEnumerable<DiscordEmbedBuilder>> ImdbAsync(string query)
+        public async Task<IEnumerable<DiscordEmbedBuilder>> ImdbAsync(string query)
         {
             var list = await _omdb.GetSearchListAsync(query);
             if (!string.IsNullOrEmpty(list.Error))
@@ -56,7 +58,7 @@ namespace LennyBOTv3.Services
             return pages;
         }
 
-        internal async Task<IEnumerable<DiscordEmbedBuilder>> UrbanDictionaryAsync(CommandContext ctx, string query)
+        public async Task<IEnumerable<DiscordEmbedBuilder>> UrbanDictionaryAsync(CommandContext ctx, string query)
         {
             query = query.Replace(' ', '+');
             var model = await Helpers.GetFromJsonAsync<UrbanDictionaryModel>($"http://api.urbandictionary.com/v0/define?term={query}");
@@ -83,7 +85,16 @@ namespace LennyBOTv3.Services
             return pages;
         }
 
-        internal async Task<IEnumerable<DiscordEmbedBuilder>> WeatherAsync(string query)
+        public async Task<IEnumerable<DiscordEmbedBuilder>> WeatherAsync(DiscordUser user)
+        {
+            var location = await _serviceProvider.GetHostedService<DatabaseService>().GetUserLocationAsync(user);
+            if (string.IsNullOrEmpty(location))
+                throw new InvalidOperationException($"User doesn't have default location set. They can use 'settings location' command to set one up.");
+
+            return await WeatherAsync(location);
+        }
+
+        public async Task<IEnumerable<DiscordEmbedBuilder>> WeatherAsync(string query)
         {
             var result = new List<DiscordEmbedBuilder?>()
             {
@@ -97,7 +108,7 @@ namespace LennyBOTv3.Services
             return result;
         }
 
-        internal async Task<IEnumerable<DiscordEmbedBuilder>> WikipediaAsync(string query)
+        public async Task<IEnumerable<DiscordEmbedBuilder>> WikipediaAsync(string query)
         {
             var responseObject = await Helpers.GetFromJsonAsync<JsonArray>($"https://en.wikipedia.org/w/api.php?action=opensearch&search={query}");
             var titles = responseObject?[1]?.AsArray();
@@ -118,7 +129,7 @@ namespace LennyBOTv3.Services
             return pages;
         }
 
-        internal async Task<string> YouTubeAsync(string query)
+        public async Task<string> YouTubeAsync(string query)
         {
             var request = _youTube.Search.List("snippet");
             request.Q = query;
@@ -138,7 +149,16 @@ namespace LennyBOTv3.Services
         private async Task<DiscordEmbedBuilder?> OpenWeatherMapAsync(string location)
         {
             var apiKey = _apiSettings.OpenWeatherMapApiKey;
-            var model = await Helpers.GetFromXmlAsync<OpenWeatherMapModel>($"https://api.openweathermap.org/data/2.5/weather?appid={apiKey}&q={location}&units=metric&mode=xml");
+            OpenWeatherMapModel? model;
+
+            try
+            {
+                model = await Helpers.GetFromXmlAsync<OpenWeatherMapModel>($"https://api.openweathermap.org/data/2.5/weather?appid={apiKey}&q={location}&units=metric&mode=xml");
+            }
+            catch
+            {
+                return null;
+            }
 
             if (model is null)
                 return null;
@@ -165,8 +185,16 @@ namespace LennyBOTv3.Services
         private async Task<DiscordEmbedBuilder?> WeatherstackAsync(string location)
         {
             var apiKey = _apiSettings.WeatherstackApiKey;
+            WeatherstackModel? model;
 
-            var model = await Helpers.GetFromJsonAsync<WeatherstackModel>($"http://api.weatherstack.com/current?access_key={apiKey}&query={location}").ConfigureAwait(false);
+            try
+            {
+                model = await Helpers.GetFromJsonAsync<WeatherstackModel>($"http://api.weatherstack.com/current?access_key={apiKey}&query={location}").ConfigureAwait(false);
+            }
+            catch
+            {
+                return null;
+            }
 
             if (model?.Current is null || model.Location is null || !model.Success)
             {
