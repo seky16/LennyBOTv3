@@ -58,7 +58,21 @@ namespace LennyBOTv3
             }
         }
 
+        public static Task MarkSuccessAsync(this CommandContext ctx)
+            => ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
+
         public static TService GetHostedService<TService>(this IServiceProvider serviceProvider) where TService : IHostedService
             => serviceProvider.GetServices<IHostedService>().OfType<TService>().Single();
+        public static string Truncate(this string str, int size, string appendix = "...")
+        {
+            if (str is null)
+                throw new ArgumentNullException(nameof(str));
+
+            if (str.Length <= size)
+                return str;
+            else
+                return string.Concat(str.AsSpan(0, size - appendix.Length), appendix ?? string.Empty);
+        }
+
     }
 }

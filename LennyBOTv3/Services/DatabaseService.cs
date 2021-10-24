@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using DSharpPlus.Entities;
 using LiteDB;
-using Newtonsoft.Json.Linq;
 
 namespace LennyBOTv3.Services
 {

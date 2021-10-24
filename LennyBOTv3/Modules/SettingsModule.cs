@@ -1,6 +1,5 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
 
 namespace LennyBOTv3.Modules
 {
@@ -20,7 +19,7 @@ namespace LennyBOTv3.Modules
             [RemainingText, Description("")] string location)
         {
             await Database.SetUserLocationAsync(ctx.User, location);
-            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client,":white_check_mark:"));
+            await ctx.MarkSuccessAsync();
         }
     }
 }

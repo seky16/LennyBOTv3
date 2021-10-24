@@ -12,19 +12,15 @@ using OMDbApiNet;
 
 namespace LennyBOTv3.Services
 {
-    public class SearchService
+    public class SearchService : LennyBaseService<SearchService>
     {
         private readonly ApiSettings _apiSettings;
-        private readonly ILogger<SearchService> _logger;
         private readonly AsyncOmdbClient _omdb;
-        private readonly IServiceProvider _serviceProvider;
         private readonly YouTubeService _youTube;
 
-        public SearchService(IServiceProvider serviceProvider)
+        public SearchService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            _serviceProvider = serviceProvider;
             _apiSettings = serviceProvider.GetRequiredService<IOptions<ApiSettings>>().Value;
-            _logger = serviceProvider.GetRequiredService<ILogger<SearchService>>();
             _omdb = serviceProvider.GetRequiredService<AsyncOmdbClient>();
             _youTube = serviceProvider.GetRequiredService<YouTubeService>();
         }
@@ -79,7 +75,7 @@ namespace LennyBOTv3.Services
                     .WithAuthor("Urban Dictionary", "https://urbandictionary.com", "https://d2gatte9o95jao.cloudfront.net/assets/apple-touch-icon-55f1ee4ebfd5444ef5f8d5ba836a2d41.png")
                     .WithColor(new DiscordColor(255, 84, 33))
                     .WithTitle($"Search results for {Formatter.Italic(query)}:")
-                    .AddField($"{item.Word ?? query} ({item.ThumbsUp} {DiscordEmoji.FromName(ctx.Client, ":thumbsup:")} / {item.ThumbsDown} {DiscordEmoji.FromName(ctx.Client, ":thumbsdown:")})", desc.ToString()));
+                    .AddField($"{item.Word ?? query} ({item.ThumbsUp} {DiscordEmoji.FromName(ctx.Client, ":thumbsup:")} / {item.ThumbsDown} {DiscordEmoji.FromName(ctx.Client, ":thumbsdown:")})", desc.ToString().Truncate(1024)));
             }
 
             return pages;
@@ -87,7 +83,7 @@ namespace LennyBOTv3.Services
 
         public async Task<IEnumerable<DiscordEmbedBuilder>> WeatherAsync(DiscordUser user)
         {
-            var location = await _serviceProvider.GetHostedService<DatabaseService>().GetUserLocationAsync(user);
+            var location = await Database.GetUserLocationAsync(user);
             if (string.IsNullOrEmpty(location))
                 throw new InvalidOperationException($"User doesn't have default location set. They can use 'settings location' command to set one up.");
 
@@ -123,7 +119,7 @@ namespace LennyBOTv3.Services
                     .WithAuthor("Wikipedia", "https://en.wikipedia.org/wiki/Main_Page", "https://upload.wikimedia.org/wikipedia/commons/d/de/Wikipedia_Logo_1.0.png")
                     .WithColor(DiscordColor.White)
                     .WithTitle($"Search results for {Formatter.Italic(query)}:")
-                    .AddField(titles[i]?.ToString(), desc));
+                    .AddField(titles[i]?.ToString(), desc?.Truncate(1024)));
             }
 
             return pages;
@@ -172,14 +168,14 @@ namespace LennyBOTv3.Services
                 //.WithFooter($"Last update: {Formatter.Timestamp(updatedOnUtc, TimestampFormat.ShortDateTime)}")
                 .WithAuthor("OpenWeather", "https://openweathermap.org/", "https://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_60x60.png")
                 .AddField("More info",
-                $"Feels like: {model.FeelsLike?.Value} °C\n" +
+                ($"Feels like: {model.FeelsLike?.Value} °C\n" +
                 $"Cloud coverage: {model.Clouds?.Value} % ({model.Clouds?.Name})\n" +
                 $"Precipitation: {model.Precipitation?.Value} mm\n" +
                 $"Humidity: {model.Humidity?.Value} {model.Humidity?.Unit}\n" +
                 $"Pressure: {model.Pressure?.Value} {model.Pressure?.Unit}\n" +
                 $"Wind: {model.Wind?.Speed?.Value} {model.Wind?.Speed?.Unit} {model.Wind?.Direction?.Code} ({model.Wind?.Speed?.Name})\n" +
                 $"Visibility: {model.Visibility?.Value / 1000.0} km\n" +
-                $"Sunrise/sunset: {model.City?.Sun?.Rise.AddSeconds(model.City?.Timezone ?? 0).TimeOfDay} / {model.City?.Sun?.Set.AddSeconds(model.City?.Timezone ?? 0).TimeOfDay} (local time)\n");
+                $"Sunrise/sunset: {model.City?.Sun?.Rise.AddSeconds(model.City?.Timezone ?? 0).TimeOfDay} / {model.City?.Sun?.Set.AddSeconds(model.City?.Timezone ?? 0).TimeOfDay} (local time)\n").Truncate(1024));
         }
 
         private async Task<DiscordEmbedBuilder?> WeatherstackAsync(string location)
@@ -198,7 +194,7 @@ namespace LennyBOTv3.Services
 
             if (model?.Current is null || model.Location is null || !model.Success)
             {
-                _logger.LogWarning("Weatherstack returned an error: {error}", model?.Error);
+                Logger.LogWarning("Weatherstack returned an error: {error}", model?.Error);
                 return null;
             }
 
@@ -215,14 +211,14 @@ namespace LennyBOTv3.Services
                 //.WithFooter($"Last update: {Formatter.Timestamp(updatedOnUtc, TimestampFormat.ShortDateTime)}")
                 .WithAuthor("weatherstack", "https://weatherstack.com", "https://weatherstack.com/site_images/weatherstack_icon.png")
                 .AddField("More info",
-                $"Feels like: {model.Current.Feelslike} °C\n" +
+                ($"Feels like: {model.Current.Feelslike} °C\n" +
                 $"Cloud coverage: {model.Current.Cloudcover} %\n" +
                 $"Precipitation: {model.Current.Precip} mm\n" +
                 $"Humidity: {model.Current.Humidity} %\n" +
                 $"Pressure: {model.Current.Pressure} mBar\n" +
                 $"Wind: {model.Current.WindSpeed} km/h {model.Current.WindDir}\n" +
                 $"Visibility: {model.Current.Visibility} km\n" +
-                $"UV Index: {model.Current.UVIndex}");
+                $"UV Index: {model.Current.UVIndex}").Truncate(1024));
         }
 
     }

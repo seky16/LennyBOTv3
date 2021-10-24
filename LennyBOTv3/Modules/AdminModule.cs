@@ -41,7 +41,7 @@ namespace LennyBOTv3.Modules
 
         [Command("sql"), Aliases("db")]
         public async Task SqlAsync(CommandContext ctx,
-            [RemainingText,Description("")] string query)
+            [RemainingText, Description("")] string query)
         {
             var result = await Database.RunQuery(query);
             await ctx.RespondAsync(Formatter.BlockCode(result, "json"));
