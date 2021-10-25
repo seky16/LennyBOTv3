@@ -8,6 +8,7 @@
         {
             _serviceProvider = serviceProvider;
         }
+
         protected DatabaseService Database => _serviceProvider.GetHostedService<DatabaseService>();
         protected ILogger<T> Logger => _serviceProvider.GetRequiredService<ILogger<T>>();
     }

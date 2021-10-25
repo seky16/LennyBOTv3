@@ -1,4 +1,6 @@
-﻿using DSharpPlus.Entities;
+﻿using DSharpPlus;
+using DSharpPlus.Entities;
+using LennyBOTv3.Models;
 
 namespace LennyBOTv3.Services
 {
@@ -8,19 +10,25 @@ namespace LennyBOTv3.Services
         {
         }
 
-        internal Task AddFeed(Uri url, DiscordChannel channel, string name)
-        {
-            throw new NotImplementedException();
-        }
+        public Task AddFeed(Uri url, DiscordChannel channel, string name)
+            => Database.AddRssFeed(new RssFeedModel() { Name = name, ChannelId = channel.Id, Url = url.AbsoluteUri, LastUpdatedUtc = DateTime.UtcNow });
 
-        internal Task RemoveFeed(DiscordChannel channel, string name)
-        {
-            throw new NotImplementedException();
-        }
+        public Task RemoveFeed(DiscordChannel channel, string name)
+            => Database.RemoveRssFeed(channel, name);
 
-        internal Task<DiscordEmbed> ListFeeds(DiscordChannel channel)
+        public async Task<DiscordEmbed> ListFeeds(DiscordChannel channel)
         {
-            throw new NotImplementedException();
+            var feeds = await Database.GetRssFeedsAsync(channel.Id);
+            if (!feeds.Any())
+                return new DiscordEmbedBuilder().WithTitle($"No feeds for {channel}");
+
+            var embed = new DiscordEmbedBuilder()
+                .WithTitle($"Feeds for {channel}");
+            foreach (var feed in feeds)
+            {
+                embed.AddField(feed.Name, $"{feed.Url}{Environment.NewLine}Last updated: {Formatter.Timestamp(feed.LastUpdatedUtc)}");
+            }
+            return embed;
         }
     }
 }

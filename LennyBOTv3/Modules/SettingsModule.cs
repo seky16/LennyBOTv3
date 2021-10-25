@@ -12,7 +12,6 @@ namespace LennyBOTv3.Modules
         public async Task LocationAsync(CommandContext ctx)
             => await ctx.RespondAsync(await Database.GetUserLocationAsync(ctx.User) ?? "<no location set>");
 
-
         [Command("location")]
         [Description("")]
         public async Task LocationAsync(CommandContext ctx,

@@ -69,6 +69,7 @@ namespace LennyBOTv3.Modules
             await ctx.Channel.SendMessageAsync(embed);
             await ctx.Message.DeleteAsync();
         }
+
         private static string GetUptime() => (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString(@"dd\.hh\:mm\:ss");
     }
 }

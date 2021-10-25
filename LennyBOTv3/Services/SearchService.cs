@@ -141,7 +141,6 @@ namespace LennyBOTv3.Services
             return $"https://www.youtube.com/watch?v={response.Items[0].Id.VideoId}";
         }
 
-
         private async Task<DiscordEmbedBuilder?> OpenWeatherMapAsync(string location)
         {
             var apiKey = _apiSettings.OpenWeatherMapApiKey;
@@ -220,6 +219,5 @@ namespace LennyBOTv3.Services
                 $"Visibility: {model.Current.Visibility} km\n" +
                 $"UV Index: {model.Current.UVIndex}").Truncate(1024));
         }
-
     }
 }

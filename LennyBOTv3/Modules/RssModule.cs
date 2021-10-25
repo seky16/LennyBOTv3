@@ -46,7 +46,7 @@ namespace LennyBOTv3.Modules
         [Command("list")]
         [Description("")]
         public async Task RssListAsync(CommandContext ctx,
-            [RemainingText, Description("")] DiscordChannel channel)
-        => await ctx.RespondAsync(await _rss.ListFeeds(channel));
+            [RemainingText, Description("")] DiscordChannel? channel = null)
+            => await ctx.RespondAsync(await _rss.ListFeeds(channel ?? ctx.Channel));
     }
 }

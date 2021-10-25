@@ -42,6 +42,7 @@ namespace LennyBOTv3
         public static DiscordEmbedBuilder GetAuthorEmbedBuilder(this DiscordUser user) => new DiscordEmbedBuilder()
                 .WithAuthor(user.GetNickname(), null, user.GetAvatarUrl(DSharpPlus.ImageFormat.Png))
                 .WithColor((user as DiscordMember)?.Color ?? DiscordColor.None);
+
         public static DiscordEmbedBuilder GetAuthorEmbedBuilder(this CommandContext ctx) =>
             GetAuthorEmbedBuilder(ctx.User);
 
@@ -63,6 +64,7 @@ namespace LennyBOTv3
 
         public static TService GetHostedService<TService>(this IServiceProvider serviceProvider) where TService : IHostedService
             => serviceProvider.GetServices<IHostedService>().OfType<TService>().Single();
+
         public static string Truncate(this string str, int size, string appendix = "...")
         {
             if (str is null)
@@ -73,6 +75,5 @@ namespace LennyBOTv3
             else
                 return string.Concat(str.AsSpan(0, size - appendix.Length), appendix ?? string.Empty);
         }
-
     }
 }

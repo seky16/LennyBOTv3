@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using DSharpPlus.Entities;
+using LennyBOTv3.Models;
 using LiteDB;
 
 namespace LennyBOTv3.Services
@@ -46,5 +47,25 @@ namespace LennyBOTv3.Services
 
         public Task SetUserLocationAsync(DiscordUser user, string location)
             => Task.Run(() => _db.GetCollection("UserLocations").Upsert(user.Id, new() { ["user"] = $"{user.Username}#{user.Discriminator}", ["location"] = location, }));
+
+        public Task<IEnumerable<RssFeedModel>> GetRssFeedsAsync(ulong channelId)
+            => Task.Run(() =>
+            {
+                var feeds = _db.GetCollection<RssFeedModel>();
+                feeds.EnsureIndex(f => f.ChannelId);
+                var results = feeds.Query().Where(f => f.ChannelId == channelId);
+                return results.ToEnumerable();
+            });
+
+        public Task RemoveRssFeed(DiscordChannel channel, string name)
+            => Task.Run(() =>
+            {
+                var feeds = _db.GetCollection<RssFeedModel>();
+                feeds.EnsureIndex(f => f.ChannelId);
+                feeds.DeleteMany(f => f.ChannelId == channel.Id && f.Name == name);
+            });
+
+        public Task AddRssFeed(RssFeedModel rssFeedModel)
+            => Task.Run(() => _db.GetCollection<RssFeedModel>().Insert(rssFeedModel));
     }
 }
