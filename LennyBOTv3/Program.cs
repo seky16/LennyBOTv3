@@ -3,7 +3,6 @@ using Alpaca.Markets;
 using Alpaca.Markets.Extensions;
 using LennyBOTv3.Services;
 using LennyBOTv3.Settings;
-using LennyBOTv3.Workers;
 
 namespace LennyBOTv3
 {
@@ -57,7 +56,7 @@ namespace LennyBOTv3
 
                 // services
                 services.AddHostedService<Bot>();
-                services.AddHostedService<DatabaseWorker>();
+                services.AddHostedService<DatabaseService>();
                 services.AddSingleton<Random>();
                 services.AddSingleton<SearchService>();
                 services.AddSingleton<RssService>();

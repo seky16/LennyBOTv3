@@ -3,9 +3,9 @@ using DSharpPlus.Entities;
 using LennyBOTv3.Models;
 using LiteDB;
 
-namespace LennyBOTv3.Workers
+namespace LennyBOTv3.Services
 {
-    public sealed class DatabaseWorker : BackgroundService
+    public sealed class DatabaseService : BackgroundService
     {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         private LiteDatabase _db;

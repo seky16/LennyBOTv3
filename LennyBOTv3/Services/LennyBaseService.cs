@@ -1,6 +1,4 @@
-﻿using LennyBOTv3.Workers;
-
-namespace LennyBOTv3.Services
+﻿namespace LennyBOTv3.Services
 {
     public abstract class LennyBaseService<T> where T : LennyBaseService<T>
     {
@@ -11,7 +9,7 @@ namespace LennyBOTv3.Services
             _serviceProvider = serviceProvider;
         }
 
-        protected DatabaseWorker Database => _serviceProvider.GetHostedService<DatabaseWorker>();
+        protected DatabaseService Database => _serviceProvider.GetHostedService<DatabaseService>();
         protected ILogger<T> Logger => _serviceProvider.GetRequiredService<ILogger<T>>();
     }
 }
