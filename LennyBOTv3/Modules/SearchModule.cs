@@ -20,6 +20,12 @@ namespace LennyBOTv3.Modules
             [RemainingText, Description("")] string query)
             => await ctx.SendPaginatedMessageAsync(await _searchService.ImdbAsync(query));
 
+        [Command("stocks"), Aliases("stock", "stonks")]
+        [Description("")]
+        public async Task StocksAsync(CommandContext ctx,
+            [RemainingText, Description("")] string symbol)
+            => await ctx.SendPaginatedMessageAsync(await _searchService.StocksAsync(symbol));
+
         [Command("urban")]
         [Description("")]
         public async Task UrbanDictionaryAsync(CommandContext ctx,

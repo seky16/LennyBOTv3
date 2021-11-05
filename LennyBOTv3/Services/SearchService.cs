@@ -1,6 +1,8 @@
 ﻿using System.Net;
 using System.Text;
 using System.Text.Json.Nodes;
+using Alpaca.Markets;
+using Alpaca.Markets.Extensions;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
@@ -17,12 +19,51 @@ namespace LennyBOTv3.Services
         private readonly ApiSettings _apiSettings;
         private readonly AsyncOmdbClient _omdb;
         private readonly YouTubeService _youTube;
+        private readonly IAlpacaDataClient _alpacaData;
+        private readonly IAlpacaTradingClient _alpacaTrading;
 
         public SearchService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
             _apiSettings = serviceProvider.GetRequiredService<IOptions<ApiSettings>>().Value;
             _omdb = serviceProvider.GetRequiredService<AsyncOmdbClient>();
             _youTube = serviceProvider.GetRequiredService<YouTubeService>();
+            _alpacaData = serviceProvider.GetRequiredService<IAlpacaDataClient>();
+            _alpacaTrading = serviceProvider.GetRequiredService<IAlpacaTradingClient>();
+        }
+
+        public async Task<IEnumerable<DiscordEmbedBuilder>> StocksAsync(string symbol)
+        {
+            var pages = new List<DiscordEmbedBuilder>();
+
+            await foreach (var bar in _alpacaData.GetHistoricalBarsAsAsyncEnumerable(new HistoricalBarsRequest(symbol,
+                DateTime.UtcNow.AddDays(-7), DateTime.UtcNow.AddMinutes(-15), BarTimeFrame.Day)))
+            {
+                pages.Add(new DiscordEmbedBuilder()
+                    .WithAuthor("Alpaca", "https://alpaca.markets/", "https://files.alpaca.markets/webassets/apple-touch-icon.png")
+                    .WithColor(new DiscordColor("#FFD700"))
+                    .WithTitle($"Information for symbol: {Formatter.Bold(bar?.Symbol)}")
+                    .WithDescription(Formatter.Timestamp(bar!.TimeUtc, TimestampFormat.LongDate))
+                    .AddField(nameof(bar.Open), bar.Open.ToString(), true)
+                    .AddField(nameof(bar.Close), bar.Close.ToString(), true)
+                    .AddField("\u200B", "\u200B", true)
+                    .AddField(nameof(bar.High), bar.High.ToString(), true)
+                    .AddField(nameof(bar.Low), bar.Low.ToString(), true)
+                    .AddField("\u200B", "\u200B", true)
+                    );
+            }
+
+            if (!pages.Any())
+                throw new HttpRequestException("Alpaca API did not return any result");
+
+            var clock = await _alpacaTrading.GetClockAsync();
+            if (clock is not null)
+                pages.Last().AddField($"Market is {Formatter.Bold(clock.IsOpen ? "open" : "closed")}",
+                    clock.IsOpen
+                        ? $"Closes {Formatter.Timestamp(clock.NextCloseUtc)}"
+                        : $"Opens {Formatter.Timestamp(clock.NextOpenUtc)}");
+            
+            pages.Reverse();
+            return pages;
         }
 
         public async Task<IEnumerable<DiscordEmbedBuilder>> ImdbAsync(string query)

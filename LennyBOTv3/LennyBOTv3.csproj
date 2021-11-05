@@ -39,6 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Alpaca.Markets.Extensions" Version="6.0.1-alpha2" />
     <PackageReference Include="FixerSharp" Version="1.2.2" />
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.55.0.2449" />
     <PackageReference Include="LiteDB" Version="5.0.11" />

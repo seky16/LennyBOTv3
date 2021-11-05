@@ -1,4 +1,6 @@
 ﻿using System.Globalization;
+using Alpaca.Markets;
+using Alpaca.Markets.Extensions;
 using LennyBOTv3.Services;
 using LennyBOTv3.Settings;
 
@@ -50,6 +52,7 @@ namespace LennyBOTv3
                 services.AddOptions<ApiSettings>().Bind(configurationRoot.GetSection(ApiSettings.SectionKey)).ValidateDataAnnotations();
                 ApiSettings apiSettings = new();
                 configurationRoot.GetSection(ApiSettings.SectionKey).Bind(apiSettings);
+                var alpacaKey = new SecretKey(apiSettings.AlpacaApiKey, apiSettings.AlpacaApiSecret);
 
                 // services
                 services.AddHostedService<Bot>();
@@ -59,6 +62,8 @@ namespace LennyBOTv3
                 services.AddSingleton<RssService>();
                 services.AddSingleton(new Google.Apis.YouTube.v3.YouTubeService(new() { ApiKey = apiSettings.YouTubeApiKey, ApplicationName = "LennyBOT" }));
                 services.AddSingleton(new OMDbApiNet.AsyncOmdbClient(apiSettings.OmdbApiKey, true));
+                services.AddAlpacaDataClient(Alpaca.Markets.Environments.Paper, alpacaKey);
+                services.AddAlpacaTradingClient(Alpaca.Markets.Environments.Paper, alpacaKey);
                 FixerSharp.Fixer.SetApiKey(apiSettings.FixerSharpApiKey);
             });
     }

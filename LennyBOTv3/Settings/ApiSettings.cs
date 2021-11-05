@@ -21,5 +21,11 @@ namespace LennyBOTv3.Settings
 
         [Required, NotNull]
         public string? YouTubeApiKey { get; set; }
+
+        [Required, NotNull]
+        public string? AlpacaApiKey { get; set; }
+
+        [Required, NotNull]
+        public string? AlpacaApiSecret { get; set; }
     }
 }
