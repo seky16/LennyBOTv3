@@ -57,9 +57,11 @@ namespace LennyBOTv3
                 // services
                 services.AddHostedService<Bot>();
                 services.AddHostedService<DatabaseService>();
+                services.AddHostedService<TimerService>();
+                services.AddSingleton<JobFactory>();
                 services.AddSingleton<Random>();
-                services.AddSingleton<SearchService>();
                 services.AddSingleton<RssService>();
+                services.AddSingleton<SearchService>();
                 services.AddSingleton(new Google.Apis.YouTube.v3.YouTubeService(new() { ApiKey = apiSettings.YouTubeApiKey, ApplicationName = "LennyBOT" }));
                 services.AddSingleton(new OMDbApiNet.AsyncOmdbClient(apiSettings.OmdbApiKey, true));
                 services.AddAlpacaDataClient(Alpaca.Markets.Environments.Paper, alpacaKey);

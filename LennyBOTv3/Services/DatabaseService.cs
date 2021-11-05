@@ -42,19 +42,22 @@ namespace LennyBOTv3.Services
             });
         }
 
+        #region Settings
         public Task<string?> GetUserLocationAsync(DiscordUser user)
             => Task.Run(() => _db.GetCollection("UserLocations").FindById(user.Id)?["location"].AsString);
 
         public Task SetUserLocationAsync(DiscordUser user, string location)
             => Task.Run(() => _db.GetCollection("UserLocations").Upsert(user.Id, new() { ["user"] = $"{user.Username}#{user.Discriminator}", ["location"] = location, }));
+        #endregion
 
-        public Task<IEnumerable<RssFeedModel>> GetRssFeedsAsync(ulong channelId)
+        #region RSS
+        public Task<List<RssFeedModel>> GetRssFeedsAsync(ulong channelId)
             => Task.Run(() =>
             {
                 var feeds = _db.GetCollection<RssFeedModel>();
                 feeds.EnsureIndex(f => f.ChannelId);
                 var results = feeds.Query().Where(f => f.ChannelId == channelId);
-                return results.ToEnumerable();
+                return results.ToList();
             });
 
         public Task RemoveRssFeed(DiscordChannel channel, string name)
@@ -67,5 +70,16 @@ namespace LennyBOTv3.Services
 
         public Task AddRssFeed(RssFeedModel rssFeedModel)
             => Task.Run(() => _db.GetCollection<RssFeedModel>().Insert(rssFeedModel));
+        #endregion
+
+        #region Jobs
+
+        public Task<List<JobModel>> GetJobsAsync()
+            => Task.Run(() => _db.GetCollection<JobModel>().FindAll().ToList());
+
+        public Task UpdateJob(JobModel jobModel)
+            => Task.Run(() => _db.GetCollection<JobModel>().Upsert(jobModel));
+
+        #endregion
     }
 }
