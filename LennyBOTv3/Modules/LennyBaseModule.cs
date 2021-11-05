@@ -1,11 +1,12 @@
 ﻿using DSharpPlus.CommandsNext;
 using LennyBOTv3.Services;
+using LennyBOTv3.Workers;
 
 namespace LennyBOTv3.Modules
 {
     public abstract class LennyBaseModule : BaseCommandModule
     {
-        protected DatabaseService Database => ServiceProvider.GetHostedService<DatabaseService>();
+        protected DatabaseWorker Database => ServiceProvider.GetHostedService<DatabaseWorker>();
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public IServiceProvider ServiceProvider { protected get; set; } // property injection
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
