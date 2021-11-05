@@ -58,6 +58,8 @@ namespace LennyBOTv3.Modules
             return RespondJoined(ctx, text, clap);
         }
 
+        private static string GetUptime() => (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString(@"dd\.hh\:mm\:ss");
+
         private async Task RespondJoined(CommandContext ctx, string text, string separator)
         {
             if (string.IsNullOrWhiteSpace(text))
@@ -69,7 +71,5 @@ namespace LennyBOTv3.Modules
             await ctx.Channel.SendMessageAsync(embed);
             await ctx.Message.DeleteAsync();
         }
-
-        private static string GetUptime() => (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString(@"dd\.hh\:mm\:ss");
     }
 }

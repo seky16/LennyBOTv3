@@ -27,6 +27,12 @@ namespace LennyBOTv3.Modules
             await ctx.MarkSuccessAsync();
         }
 
+        [Command("list")]
+        [Description("")]
+        public async Task RssListAsync(CommandContext ctx,
+            [RemainingText, Description("")] DiscordChannel? channel = null)
+            => await ctx.RespondAsync(await _rss.ListFeeds(channel ?? ctx.Channel));
+
         [Command("remove"), Priority(1)]
         [Description("")]
         public async Task RssRemoveAsync(CommandContext ctx,
@@ -42,11 +48,5 @@ namespace LennyBOTv3.Modules
         public Task RssRemoveAsync(CommandContext ctx,
             [RemainingText, Description("")] string name)
             => RssRemoveAsync(ctx, ctx.Channel, name);
-
-        [Command("list")]
-        [Description("")]
-        public async Task RssListAsync(CommandContext ctx,
-            [RemainingText, Description("")] DiscordChannel? channel = null)
-            => await ctx.RespondAsync(await _rss.ListFeeds(channel ?? ctx.Channel));
     }
 }

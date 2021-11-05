@@ -8,6 +8,7 @@
             {
                 case nameof(test):
                     return test();
+
                 default:
                     throw new NotImplementedException(name);
             }

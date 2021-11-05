@@ -7,6 +7,18 @@ namespace LennyBOTv3
 {
     public static class Extensions
     {
+        public static DiscordEmbedBuilder GetAuthorEmbedBuilder(this DiscordUser user) => new DiscordEmbedBuilder()
+                .WithAuthor(user.GetNickname(), null, user.GetAvatarUrl(DSharpPlus.ImageFormat.Png))
+                .WithColor((user as DiscordMember)?.Color ?? DiscordColor.None);
+
+        public static DiscordEmbedBuilder GetAuthorEmbedBuilder(this CommandContext ctx) =>
+            GetAuthorEmbedBuilder(ctx.User);
+
+        public static TService GetHostedService<TService>(this IServiceProvider serviceProvider) where TService : IHostedService
+            => serviceProvider.GetServices<IHostedService>().OfType<TService>().Single();
+
+        public static string GetNickname(this DiscordUser user) => (user as DiscordMember)?.Nickname ?? user.Username;
+
         public static bool ImplementsInterface(this Type type, Type @interface)
         {
             if (type == null)
@@ -37,14 +49,8 @@ namespace LennyBOTv3
             return false;
         }
 
-        public static string GetNickname(this DiscordUser user) => (user as DiscordMember)?.Nickname ?? user.Username;
-
-        public static DiscordEmbedBuilder GetAuthorEmbedBuilder(this DiscordUser user) => new DiscordEmbedBuilder()
-                .WithAuthor(user.GetNickname(), null, user.GetAvatarUrl(DSharpPlus.ImageFormat.Png))
-                .WithColor((user as DiscordMember)?.Color ?? DiscordColor.None);
-
-        public static DiscordEmbedBuilder GetAuthorEmbedBuilder(this CommandContext ctx) =>
-            GetAuthorEmbedBuilder(ctx.User);
+        public static Task MarkSuccessAsync(this CommandContext ctx)
+            => ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
 
         public static Task SendPaginatedMessageAsync(this CommandContext ctx, IEnumerable<DiscordEmbedBuilder> embeds)
         {
@@ -58,12 +64,6 @@ namespace LennyBOTv3
                 return ctx.Channel.SendPaginatedMessageAsync(ctx.User, pages);
             }
         }
-
-        public static Task MarkSuccessAsync(this CommandContext ctx)
-            => ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
-
-        public static TService GetHostedService<TService>(this IServiceProvider serviceProvider) where TService : IHostedService
-            => serviceProvider.GetServices<IHostedService>().OfType<TService>().Single();
 
         public static string Truncate(this string str, int size, string appendix = "...")
         {

@@ -16,11 +16,11 @@ namespace LennyBOTv3.Services
 {
     public class SearchService : LennyBaseService<SearchService>
     {
+        private readonly IAlpacaDataClient _alpacaData;
+        private readonly IAlpacaTradingClient _alpacaTrading;
         private readonly ApiSettings _apiSettings;
         private readonly AsyncOmdbClient _omdb;
         private readonly YouTubeService _youTube;
-        private readonly IAlpacaDataClient _alpacaData;
-        private readonly IAlpacaTradingClient _alpacaTrading;
 
         public SearchService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
@@ -29,6 +29,35 @@ namespace LennyBOTv3.Services
             _youTube = serviceProvider.GetRequiredService<YouTubeService>();
             _alpacaData = serviceProvider.GetRequiredService<IAlpacaDataClient>();
             _alpacaTrading = serviceProvider.GetRequiredService<IAlpacaTradingClient>();
+        }
+
+        public async Task<IEnumerable<DiscordEmbedBuilder>> ImdbAsync(string query)
+        {
+            var list = await _omdb.GetSearchListAsync(query);
+            if (!string.IsNullOrEmpty(list.Error))
+                throw new HttpRequestException($"OmdbApi returned an error: {list.Error}", null, HttpStatusCode.BadRequest);
+
+            if (list.SearchResults.Count == 0)
+                throw new HttpRequestException("OmdbApi did not return any result", null, HttpStatusCode.BadRequest);
+
+            var pages = new List<DiscordEmbedBuilder>();
+            foreach (var result in list.SearchResults)
+            {
+                var item = await _omdb.GetItemByIdAsync(result.ImdbId);
+                pages.Add(new DiscordEmbedBuilder()
+                    .WithAuthor("IMDb", "https://www.imdb.com/", "http://files.softicons.com/download/social-media-icons/flat-gradient-social-icons-by-guilherme-lima/png/512x512/IMDb.png")
+                    .WithColor(DiscordColor.Goldenrod)
+                    .WithTitle($"{item.Title} ({item.Year})")
+                    .WithDescription($"{item.Plot} ({item.Runtime})")
+                    .WithUrl($"https://www.imdb.com/title/{ item.ImdbId}")
+                    .WithImageUrl(item.Poster)
+                    .AddField("Rating", $"{item.ImdbRating}\nMetascore: {item.Metascore}")
+                    .AddField("Info", $"Director: {item.Director}\nWriter: {item.Writer}\nCast: {item.Actors}\nGenre: {item.Genre}\nCountry: {item.Country}")
+                    .AddField("Release dates", $"Released: {item.Released}\nDVD: {item.Dvd}", true)
+                    .AddField("Trivia", $"Box office: {item.BoxOffice}\nAwards: {item.Awards}"));
+            }
+
+            return pages;
         }
 
         public async Task<IEnumerable<DiscordEmbedBuilder>> StocksAsync(string symbol)
@@ -61,37 +90,8 @@ namespace LennyBOTv3.Services
                     clock.IsOpen
                         ? $"Closes {Formatter.Timestamp(clock.NextCloseUtc)}"
                         : $"Opens {Formatter.Timestamp(clock.NextOpenUtc)}");
-            
+
             pages.Reverse();
-            return pages;
-        }
-
-        public async Task<IEnumerable<DiscordEmbedBuilder>> ImdbAsync(string query)
-        {
-            var list = await _omdb.GetSearchListAsync(query);
-            if (!string.IsNullOrEmpty(list.Error))
-                throw new HttpRequestException($"OmdbApi returned an error: {list.Error}", null, HttpStatusCode.BadRequest);
-
-            if (list.SearchResults.Count == 0)
-                throw new HttpRequestException("OmdbApi did not return any result", null, HttpStatusCode.BadRequest);
-
-            var pages = new List<DiscordEmbedBuilder>();
-            foreach (var result in list.SearchResults)
-            {
-                var item = await _omdb.GetItemByIdAsync(result.ImdbId);
-                pages.Add(new DiscordEmbedBuilder()
-                    .WithAuthor("IMDb", "https://www.imdb.com/", "http://files.softicons.com/download/social-media-icons/flat-gradient-social-icons-by-guilherme-lima/png/512x512/IMDb.png")
-                    .WithColor(DiscordColor.Goldenrod)
-                    .WithTitle($"{item.Title} ({item.Year})")
-                    .WithDescription($"{item.Plot} ({item.Runtime})")
-                    .WithUrl($"https://www.imdb.com/title/{ item.ImdbId}")
-                    .WithImageUrl(item.Poster)
-                    .AddField("Rating", $"{item.ImdbRating}\nMetascore: {item.Metascore}")
-                    .AddField("Info", $"Director: {item.Director}\nWriter: {item.Writer}\nCast: {item.Actors}\nGenre: {item.Genre}\nCountry: {item.Country}")
-                    .AddField("Release dates", $"Released: {item.Released}\nDVD: {item.Dvd}", true)
-                    .AddField("Trivia", $"Box office: {item.BoxOffice}\nAwards: {item.Awards}"));
-            }
-
             return pages;
         }
 

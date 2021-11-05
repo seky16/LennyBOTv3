@@ -4,12 +4,11 @@ namespace LennyBOTv3.Services
 {
     public class TimerService : BackgroundService
     {
-        private readonly AsyncLock _lock = new();
-        private Timer? _dispatcher;
         private readonly JobFactory _jobFactory;
+        private readonly AsyncLock _lock = new();
         private readonly ILogger<TimerService> _logger;
         private readonly IServiceProvider _serviceProvider;
-        private DatabaseService Database => _serviceProvider.GetHostedService<DatabaseService>();
+        private Timer? _dispatcher;
 
         public TimerService(ILogger<TimerService> logger, IServiceProvider serviceProvider, JobFactory jobFactory)
         {
@@ -18,11 +17,7 @@ namespace LennyBOTv3.Services
             _jobFactory = jobFactory;
         }
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            _dispatcher = new(Tick, stoppingToken, TimeSpan.Zero, TimeSpan.FromSeconds(1));
-            return Task.CompletedTask;
-        }
+        private DatabaseService Database => _serviceProvider.GetHostedService<DatabaseService>();
 
         public override void Dispose()
         {
@@ -30,6 +25,12 @@ namespace LennyBOTv3.Services
             _dispatcher?.Dispose();
             base.Dispose();
             GC.SuppressFinalize(this);
+        }
+
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            _dispatcher = new(Tick, stoppingToken, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+            return Task.CompletedTask;
         }
 
         private async void Tick(object? o)

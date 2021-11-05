@@ -13,9 +13,6 @@ namespace LennyBOTv3.Services
         public Task AddFeed(Uri url, DiscordChannel channel, string name)
             => Database.AddRssFeed(new RssFeedModel() { Name = name, ChannelId = channel.Id, Url = url.AbsoluteUri, LastUpdatedUtc = DateTime.UtcNow });
 
-        public Task RemoveFeed(DiscordChannel channel, string name)
-            => Database.RemoveRssFeed(channel, name);
-
         public async Task<DiscordEmbed> ListFeeds(DiscordChannel channel)
         {
             var feeds = await Database.GetRssFeedsAsync(channel.Id);
@@ -30,5 +27,8 @@ namespace LennyBOTv3.Services
             }
             return embed;
         }
+
+        public Task RemoveFeed(DiscordChannel channel, string name)
+                    => Database.RemoveRssFeed(channel, name);
     }
 }

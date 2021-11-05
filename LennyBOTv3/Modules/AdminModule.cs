@@ -11,19 +11,6 @@ namespace LennyBOTv3.Modules
     [RequireOwner, Hidden]
     public sealed class AdministrationModule : LennyBaseModule
     {
-        [Command("sudo"), Description("Executes a command as another user.")]
-        public async Task SudoAsync(CommandContext ctx,
-            [Description("Member to execute the command as.")] DiscordMember member,
-            [RemainingText, Description("Command text to execute.")] string command)
-        {
-            var cmd = ctx.CommandsNext.FindCommand(command, out var args);
-            if (cmd is null)
-                throw new CommandNotFoundException(command);
-
-            var fctx = ctx.CommandsNext.CreateFakeContext(member, ctx.Channel, command, ctx.Prefix, cmd, args);
-            await ctx.CommandsNext.ExecuteCommandAsync(fctx);
-        }
-
         [Command("nick"), Aliases("nickname"), Description("Changes the bot's nickname."), RequireOwner, RequireGuild]
         public async Task NicknameAsync(CommandContext ctx,
             [Description("New nickname for the bot.")] string new_nickname = "")
@@ -45,6 +32,19 @@ namespace LennyBOTv3.Modules
         {
             var result = await Database.RunQuery(query);
             await ctx.RespondAsync(Formatter.BlockCode(result, "json"));
+        }
+
+        [Command("sudo"), Description("Executes a command as another user.")]
+        public async Task SudoAsync(CommandContext ctx,
+            [Description("Member to execute the command as.")] DiscordMember member,
+            [RemainingText, Description("Command text to execute.")] string command)
+        {
+            var cmd = ctx.CommandsNext.FindCommand(command, out var args);
+            if (cmd is null)
+                throw new CommandNotFoundException(command);
+
+            var fctx = ctx.CommandsNext.CreateFakeContext(member, ctx.Channel, command, ctx.Prefix, cmd, args);
+            await ctx.CommandsNext.ExecuteCommandAsync(fctx);
         }
     }
 }

@@ -43,14 +43,17 @@ namespace LennyBOTv3.Services
         }
 
         #region Settings
+
         public Task<string?> GetUserLocationAsync(DiscordUser user)
             => Task.Run(() => _db.GetCollection("UserLocations").FindById(user.Id)?["location"].AsString);
 
         public Task SetUserLocationAsync(DiscordUser user, string location)
             => Task.Run(() => _db.GetCollection("UserLocations").Upsert(user.Id, new() { ["user"] = $"{user.Username}#{user.Discriminator}", ["location"] = location, }));
-        #endregion
+
+        #endregion Settings
 
         #region RSS
+
         public Task<List<RssFeedModel>> GetRssFeedsAsync(ulong channelId)
             => Task.Run(() =>
             {
@@ -70,7 +73,8 @@ namespace LennyBOTv3.Services
 
         public Task AddRssFeed(RssFeedModel rssFeedModel)
             => Task.Run(() => _db.GetCollection<RssFeedModel>().Insert(rssFeedModel));
-        #endregion
+
+        #endregion RSS
 
         #region Jobs
 
@@ -80,6 +84,6 @@ namespace LennyBOTv3.Services
         public Task UpdateJob(JobModel jobModel)
             => Task.Run(() => _db.GetCollection<JobModel>().Upsert(jobModel));
 
-        #endregion
+        #endregion Jobs
     }
 }

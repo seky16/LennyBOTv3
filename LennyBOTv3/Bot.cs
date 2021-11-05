@@ -15,10 +15,8 @@ namespace LennyBOTv3
 {
     public class Bot : BackgroundService
     {
-        private readonly ILogger<Bot> _logger;
         private readonly DiscordSettings _discordSettings;
-
-        public DiscordClient DiscordClient { get; }
+        private readonly ILogger<Bot> _logger;
 
         public Bot(ILoggerFactory loggerFactory, IOptions<DiscordSettings> discordSettings, IServiceProvider serviceProvider)
         {
@@ -57,10 +55,7 @@ namespace LennyBOTv3
             commands.CommandErrored += CommandsNext_CommandErrored;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            await DiscordClient.ConnectAsync();
-        }
+        public DiscordClient DiscordClient { get; }
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
@@ -69,40 +64,9 @@ namespace LennyBOTv3
             await base.StopAsync(cancellationToken);
         }
 
-        private Task Discord_Ready(DiscordClient sender, ReadyEventArgs e)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            sender.Logger.LogInformation("Client is ready to process events");
-            return Task.CompletedTask;
-        }
-
-        private Task Discord_GuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs e)
-        {
-            sender.Logger.LogInformation("All guilds are now available");
-            return Task.CompletedTask;
-        }
-
-        private Task Discord_SocketErrored(DiscordClient sender, SocketErrorEventArgs e)
-        {
-            var ex = e.Exception;
-            while (ex is AggregateException || ex is TargetInvocationException)
-                ex = ex.InnerException;
-
-            sender.Logger.LogCritical(ex, "Socket threw an exception");
-            return Task.CompletedTask;
-        }
-
-        private Task Discord_GuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
-        {
-            sender.Logger.LogInformation("Guild available: {guildName}", e.Guild.Name);
-            return Task.CompletedTask;
-        }
-
-        private Task CommandsNext_CommandExecuted(CommandsNextExtension sender, CommandExecutionEventArgs e)
-        {
-            e.Context.Client.Logger.LogInformation(
-                "User '{user}' ({userId}) executed '{command}' in #{channel} ({channelId})",
-                $"{e.Context.User.Username}#{e.Context.User.Discriminator}", e.Context.User.Id, e.Command?.QualifiedName ?? "<unknown command>", e.Context.Channel.Name, e.Context.Channel.Id);
-            return Task.CompletedTask;
+            await DiscordClient.ConnectAsync();
         }
 
         private async Task CommandsNext_CommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
@@ -157,6 +121,42 @@ namespace LennyBOTv3
 
             if (embed != null)
                 await e.Context.RespondAsync("", embed: embed.Build());
+        }
+
+        private Task CommandsNext_CommandExecuted(CommandsNextExtension sender, CommandExecutionEventArgs e)
+        {
+            e.Context.Client.Logger.LogInformation(
+                "User '{user}' ({userId}) executed '{command}' in #{channel} ({channelId})",
+                $"{e.Context.User.Username}#{e.Context.User.Discriminator}", e.Context.User.Id, e.Command?.QualifiedName ?? "<unknown command>", e.Context.Channel.Name, e.Context.Channel.Id);
+            return Task.CompletedTask;
+        }
+
+        private Task Discord_GuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
+        {
+            sender.Logger.LogInformation("Guild available: {guildName}", e.Guild.Name);
+            return Task.CompletedTask;
+        }
+
+        private Task Discord_GuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs e)
+        {
+            sender.Logger.LogInformation("All guilds are now available");
+            return Task.CompletedTask;
+        }
+
+        private Task Discord_Ready(DiscordClient sender, ReadyEventArgs e)
+        {
+            sender.Logger.LogInformation("Client is ready to process events");
+            return Task.CompletedTask;
+        }
+
+        private Task Discord_SocketErrored(DiscordClient sender, SocketErrorEventArgs e)
+        {
+            var ex = e.Exception;
+            while (ex is AggregateException || ex is TargetInvocationException)
+                ex = ex.InnerException;
+
+            sender.Logger.LogCritical(ex, "Socket threw an exception");
+            return Task.CompletedTask;
         }
     }
 }

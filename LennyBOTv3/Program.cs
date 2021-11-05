@@ -8,35 +8,6 @@ namespace LennyBOTv3
 {
     public static class Program
     {
-        private static async Task<int> Main(string[] args)
-        {
-            #region Culture
-
-            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
-            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
-            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
-            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
-
-            #endregion Culture
-
-            using var host = CreateHostBuilder(args).Build();
-            var logger = host.Services.GetRequiredService<ILogger<IHost>>();
-
-            try
-            {
-                await host.RunAsync();
-            }
-            catch (Exception e)
-            {
-                logger.LogCritical("Unhandled exception:\n{Exception}", e);
-                return -1;
-            }
-
-            return 0;
-        }
-
         private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
             .ConfigureLogging(logging =>
@@ -68,5 +39,34 @@ namespace LennyBOTv3
                 services.AddAlpacaTradingClient(Alpaca.Markets.Environments.Paper, alpacaKey);
                 FixerSharp.Fixer.SetApiKey(apiSettings.FixerSharpApiKey);
             });
+
+        private static async Task<int> Main(string[] args)
+        {
+            #region Culture
+
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
+            #endregion Culture
+
+            using var host = CreateHostBuilder(args).Build();
+            var logger = host.Services.GetRequiredService<ILogger<IHost>>();
+
+            try
+            {
+                await host.RunAsync();
+            }
+            catch (Exception e)
+            {
+                logger.LogCritical("Unhandled exception:\n{Exception}", e);
+                return -1;
+            }
+
+            return 0;
+        }
     }
 }
