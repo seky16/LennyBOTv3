@@ -2,6 +2,23 @@
 {
     public class JobFactory
     {
+        private DatabaseService _db;
+
+        public JobFactory(IServiceProvider serviceProvider)
+        {
+            Task.Run(async () =>
+            {
+                _db = serviceProvider.GetHostedService<DatabaseService>();
+                await _db.Initialized;
+
+                // todo
+                // get all [Job]s
+                // cache them (dict [name]=[methodInfo?])
+                // add missing to db
+                // use cache in getJob
+            });
+        }
+
         public Task GetJob(string name)
         {
             switch (name)

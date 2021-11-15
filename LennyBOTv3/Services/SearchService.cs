@@ -81,7 +81,7 @@ namespace LennyBOTv3.Services
                     );
             }
 
-            if (!pages.Any())
+            if (pages.Count == 0)
                 throw new HttpRequestException("Alpaca API did not return any result");
 
             var clock = await _alpacaTrading.GetClockAsync();

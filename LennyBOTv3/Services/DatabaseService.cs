@@ -7,15 +7,21 @@ namespace LennyBOTv3.Services
 {
     public sealed class DatabaseService : BackgroundService
     {
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-        private LiteDatabase _db;
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+        private readonly LiteDatabase _db;
+        public Task Initialized => _init.Task;
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        private readonly TaskCompletionSource _init = new();
+
+        public DatabaseService()
         {
             _db = new("LennyBOTv3.db");
             _db.Mapper.EnumAsInteger = true;
             _db.UtcDate = true;
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            _init.SetResult();
             await Task.Delay(-1, stoppingToken);
         }
 
