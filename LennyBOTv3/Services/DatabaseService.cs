@@ -31,7 +31,7 @@ namespace LennyBOTv3.Services
             base.Dispose();
         }
 
-        public Task<string> RunQuery(string query)
+        public Task<string> RunQueryAsync(string query)
         {
             return Task.Run(() =>
             {
@@ -87,7 +87,7 @@ namespace LennyBOTv3.Services
         public Task<List<JobModel>> GetJobsAsync()
             => Task.Run(() => _db.GetCollection<JobModel>().FindAll().ToList());
 
-        public Task UpdateJob(JobModel jobModel)
+        public Task UpdateJobAsync(JobModel jobModel)
             => Task.Run(() => _db.GetCollection<JobModel>().Upsert(jobModel));
 
         #endregion Jobs

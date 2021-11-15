@@ -47,7 +47,7 @@ namespace LennyBOTv3.Services
                     {
                         var enabled = true;
                         _logger.LogDebug("Running job '{name}'", job.Name);
-                        var jobTask = _jobFactory.GetJob(job.Name);
+                        var jobTask = _jobFactory.GetJob(job.Name, utcNow);
                         try
                         {
                             await jobTask;
@@ -58,7 +58,7 @@ namespace LennyBOTv3.Services
                             if (!job.RepeatOnError)
                                 enabled = false;
                         }
-                        await Database.UpdateJob(job with { LastRunUtc = utcNow, Enabled = enabled });
+                        await Database.UpdateJobAsync(job with { LastRunUtc = utcNow, Enabled = enabled });
                     }
                 }
             }
