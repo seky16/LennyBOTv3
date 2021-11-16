@@ -1,33 +1,37 @@
 ﻿using System.Reflection;
+using LennyBOTv3.Models;
 
 namespace LennyBOTv3.Services
 {
     public class JobFactory
     {
-        private DatabaseService _db;
         private Dictionary<string, MethodInfo> _methods;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ILoggerFactory _loggerFactory;
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-        public JobFactory(IServiceProvider serviceProvider)
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+        public JobFactory(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
+            _serviceProvider = serviceProvider;
+            _loggerFactory = loggerFactory;
             Task.Run(async () =>
             {
-                _db = serviceProvider.GetHostedService<DatabaseService>();
-                await _db.Initialized;
+                var db = serviceProvider.GetHostedService<DatabaseService>();
+                await db.Initialized;
 
                 _methods = Assembly.GetExecutingAssembly().GetTypes().SelectMany(t => t.GetMethods())
-                    .Where(m => m.GetCustomAttributes<JobAttribute>().Any() && m.ReturnType == typeof(Task) &&
-                        m.IsStatic && m.GetParameters().Length == 1 && m.GetParameters()[0].ParameterType == typeof(DateTime))
-                    .ToDictionary(m=>m.GetCustomAttribute<JobAttribute>()!.Name);
+                    .Where(m => m.GetCustomAttributes<JobAttribute>().Any() && m.ReturnType == typeof(Task)
+                        && m.IsStatic && m.GetParameters().Length == 3 && m.GetParameters()[0].ParameterType == typeof(DateTime)
+                        && m.GetParameters()[1].ParameterType == typeof(ILogger) && m.GetParameters()[2].ParameterType==typeof(IServiceProvider))
+                    .ToDictionary(m => m.GetCustomAttribute<JobAttribute>()!.Name);
 
-                var inDb = await _db.GetJobsAsync();
-                foreach (var (name, _) in _methods)
+                var inDb = (await db.GetJobsAsync()).Select(j => j.Name);
+
+                var missingInDb = _methods.Keys.Except(inDb);
+                var missingInCode = inDb.Except(_methods.Keys);
+
+                foreach (var name in missingInDb)
                 {
-                    if (inDb.Any(j => j.Name.Equals(name)))
-                        continue;
-
-                    await _db.UpdateJobAsync(new Models.JobModel()
+                    await db.UpsertJobAsync(new Models.JobModel()
                     {
                         Name = name,
                         Enabled = true,
@@ -36,22 +40,51 @@ namespace LennyBOTv3.Services
                         RepeatOnError = true,
                     });
                 }
+
+                foreach (var name in missingInCode)
+                {
+                    await db.DeleteJobAsync(name);
+                }
             });
         }
 
         public Task GetJob(string name, DateTime utcNow)
         {
-            return (Task)_methods[name].Invoke(null, new object?[] {utcNow})!;
+            var logger = _loggerFactory.CreateLogger("job " + name);
+            return (Task)_methods[name].Invoke(null, new object?[] { utcNow, logger, _serviceProvider })!;
         }
 
-        [Job(nameof(Test))]
-        public static async Task Test(DateTime utcNow)
+        #region Jobs
+
+        //[Job(nameof(Test))]
+        public static async Task Test(DateTime utcNow, ILogger logger, IServiceProvider serviceProvider)
         {
-            await Task.Yield();
             //throw new Exception(DateTime.UtcNow.ToString());
-            Console.WriteLine(utcNow);
+            logger.LogInformation("{utcNow}", utcNow);
         }
+
+        [Job(nameof(UpdateChannelTopic))]
+        public static async Task UpdateChannelTopic(DateTime utcNow, ILogger logger, IServiceProvider serviceProvider)
+        {
+            var discordClient = serviceProvider.GetHostedService<Bot>().DiscordClient;
+            var db = serviceProvider.GetHostedService<DatabaseService>();
+
+            var descriptions = await db.GetAllAsync<ChannelDescriptionModel>();
+            foreach (var desc in descriptions)
+            {
+                var channel = await discordClient.GetChannelAsync(desc.ChannelId);
+
+                if (channel == null)
+                    continue;
+
+
+            }
+        }
+
+        #endregion
     }
+
+    #region JobAttribute
 
     [AttributeUsage(AttributeTargets.Method)]
     public class JobAttribute : Attribute
@@ -63,4 +96,5 @@ namespace LennyBOTv3.Services
 
         public string Name { get; }
     }
+    #endregion
 }

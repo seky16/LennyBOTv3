@@ -27,10 +27,10 @@ namespace LennyBOTv3.Services
             GC.SuppressFinalize(this);
         }
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            await _serviceProvider.GetHostedService<Bot>().Initialized;
             _dispatcher = new(Tick, stoppingToken, TimeSpan.Zero, TimeSpan.FromSeconds(1));
-            return Task.CompletedTask;
         }
 
         private async void Tick(object? o)
@@ -56,9 +56,12 @@ namespace LennyBOTv3.Services
                         {
                             _logger.LogError(ex, "Job '{name}' threw exception", job.Name);
                             if (!job.RepeatOnError)
+                            {
                                 enabled = false;
+                                _logger.LogInformation("Disabling job '{jobName}'", job.Name);
+                            }
                         }
-                        await Database.UpdateJobAsync(job with { LastRunUtc = utcNow, Enabled = enabled });
+                        await Database.UpsertJobAsync(job with { LastRunUtc = utcNow, Enabled = enabled });
                     }
                 }
             }

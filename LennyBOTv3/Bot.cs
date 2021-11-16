@@ -16,6 +16,7 @@ namespace LennyBOTv3
     public class Bot : BackgroundService
     {
         private readonly DiscordSettings _discordSettings;
+        private readonly TaskCompletionSource _init = new();
         private readonly ILogger<Bot> _logger;
 
         public Bot(ILoggerFactory loggerFactory, IOptions<DiscordSettings> discordSettings, IServiceProvider serviceProvider)
@@ -56,6 +57,7 @@ namespace LennyBOTv3
         }
 
         public DiscordClient DiscordClient { get; }
+        public Task Initialized => _init.Task;
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
@@ -139,6 +141,7 @@ namespace LennyBOTv3
 
         private Task Discord_GuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs e)
         {
+            _init.SetResult();
             sender.Logger.LogInformation("All guilds are now available");
             return Task.CompletedTask;
         }

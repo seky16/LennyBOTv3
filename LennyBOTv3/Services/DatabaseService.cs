@@ -8,8 +8,6 @@ namespace LennyBOTv3.Services
     public sealed class DatabaseService : BackgroundService
     {
         private readonly LiteDatabase _db;
-        public Task Initialized => _init.Task;
-
         private readonly TaskCompletionSource _init = new();
 
         public DatabaseService()
@@ -19,11 +17,7 @@ namespace LennyBOTv3.Services
             _db.UtcDate = true;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            _init.SetResult();
-            await Task.Delay(-1, stoppingToken);
-        }
+        public Task Initialized => _init.Task;
 
         public override void Dispose()
         {
@@ -47,6 +41,14 @@ namespace LennyBOTv3.Services
                 return sb.ToString();
             });
         }
+        public Task<List<T>> GetAllAsync<T>()
+            => Task.Run(() => _db.GetCollection<T>().FindAll().ToList());
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            _init.SetResult();
+            await Task.Delay(-1, stoppingToken);
+        }
 
         #region Settings
 
@@ -60,8 +62,11 @@ namespace LennyBOTv3.Services
 
         #region RSS
 
+        public Task AddRssFeed(RssFeedModel rssFeedModel)
+            => Task.Run(() => _db.GetCollection<RssFeedModel>().Insert(rssFeedModel));
+
         public Task<List<RssFeedModel>> GetRssFeedsAsync(ulong channelId)
-            => Task.Run(() =>
+                    => Task.Run(() =>
             {
                 var feeds = _db.GetCollection<RssFeedModel>();
                 feeds.EnsureIndex(f => f.ChannelId);
@@ -77,17 +82,17 @@ namespace LennyBOTv3.Services
                 feeds.DeleteMany(f => f.ChannelId == channel.Id && f.Name == name);
             });
 
-        public Task AddRssFeed(RssFeedModel rssFeedModel)
-            => Task.Run(() => _db.GetCollection<RssFeedModel>().Insert(rssFeedModel));
-
         #endregion RSS
 
         #region Jobs
 
-        public Task<List<JobModel>> GetJobsAsync()
-            => Task.Run(() => _db.GetCollection<JobModel>().FindAll().ToList());
+        public Task DeleteJobAsync(string name)
+            => Task.Run(() => _db.GetCollection<JobModel>().Delete(name));
 
-        public Task UpdateJobAsync(JobModel jobModel)
+        public Task<List<JobModel>> GetJobsAsync()
+            => GetAllAsync<JobModel>();
+
+        public Task UpsertJobAsync(JobModel jobModel)
             => Task.Run(() => _db.GetCollection<JobModel>().Upsert(jobModel));
 
         #endregion Jobs
