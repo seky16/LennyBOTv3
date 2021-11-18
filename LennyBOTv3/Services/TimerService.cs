@@ -2,17 +2,14 @@
 
 namespace LennyBOTv3.Services
 {
-    public class TimerService : BackgroundService
+    public class TimerService : LennyBackgroundService<TimerService>
     {
         private readonly JobFactory _jobFactory;
-        private readonly AsyncLock _lock = new();
-        private readonly ILogger<TimerService> _logger;
         private readonly IServiceProvider _serviceProvider;
         private Timer? _dispatcher;
 
-        public TimerService(ILogger<TimerService> logger, IServiceProvider serviceProvider, JobFactory jobFactory)
+        public TimerService(IServiceProvider serviceProvider, JobFactory jobFactory) : base(serviceProvider)
         {
-            _logger = logger;
             _serviceProvider = serviceProvider;
             _jobFactory = jobFactory;
         }
@@ -30,6 +27,7 @@ namespace LennyBOTv3.Services
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await _serviceProvider.GetHostedService<Bot>().Initialized;
+            Init.SetResult();
             _dispatcher = new(Tick, stoppingToken, TimeSpan.Zero, TimeSpan.FromSeconds(1));
         }
 
@@ -49,11 +47,11 @@ namespace LennyBOTv3.Services
                 catch (OperationCanceledException) { }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Job '{name}' threw exception", job.Name);
+                    Logger.LogError(ex, "Job '{name}' threw exception", job.Name);
                     if (!job.RepeatOnError)
                     {
                         enabled = false;
-                        _logger.LogInformation("Disabling job '{jobName}'", job.Name);
+                        Logger.LogInformation("Disabling job '{jobName}'", job.Name);
                     }
                 }
                 await Database.UpsertJobAsync(job with { Running = false, Enabled = enabled });

@@ -8,20 +8,18 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
+using LennyBOTv3.Services;
 using LennyBOTv3.Settings;
 using Microsoft.Extensions.Options;
 
 namespace LennyBOTv3
 {
-    public class Bot : BackgroundService
+    public class Bot : LennyBackgroundService<Bot>
     {
         private readonly DiscordSettings _discordSettings;
-        private readonly TaskCompletionSource _init = new();
-        private readonly ILogger<Bot> _logger;
 
-        public Bot(ILoggerFactory loggerFactory, IOptions<DiscordSettings> discordSettings, IServiceProvider serviceProvider)
+        public Bot(ILoggerFactory loggerFactory, IOptions<DiscordSettings> discordSettings, IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            _logger = loggerFactory.CreateLogger<Bot>();
             _discordSettings = discordSettings.Value;
 
             DiscordClient = new DiscordClient(new()
@@ -57,7 +55,6 @@ namespace LennyBOTv3
         }
 
         public DiscordClient DiscordClient { get; }
-        public Task Initialized => _init.Task;
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
@@ -141,7 +138,7 @@ namespace LennyBOTv3
 
         private Task Discord_GuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs e)
         {
-            _init.SetResult();
+            Init.SetResult();
             sender.Logger.LogInformation("All guilds are now available");
             return Task.CompletedTask;
         }

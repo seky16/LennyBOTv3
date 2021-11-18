@@ -5,19 +5,16 @@ using LiteDB;
 
 namespace LennyBOTv3.Services
 {
-    public sealed class DatabaseService : BackgroundService
+    public sealed class DatabaseService : LennyBackgroundService<DatabaseService>
     {
         private readonly LiteDatabase _db;
-        private readonly TaskCompletionSource _init = new();
 
-        public DatabaseService()
+        public DatabaseService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
             _db = new("Files/LennyBOTv3.db");
             _db.Mapper.EnumAsInteger = true;
             _db.UtcDate = true;
         }
-
-        public Task Initialized => _init.Task;
 
         public override void Dispose()
         {
@@ -47,12 +44,6 @@ namespace LennyBOTv3.Services
 
         public Task UpsertAsync<T>(T model)
                     => Task.Run(() => _db.GetCollection<T>().Upsert(model));
-
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            _init.SetResult();
-            await Task.Delay(-1, stoppingToken);
-        }
 
         #region Settings
 
