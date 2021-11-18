@@ -26,26 +26,29 @@ namespace LennyBOTv3.Services
                         && m.GetParameters()[1].ParameterType == typeof(ILogger) && m.GetParameters()[2].ParameterType == typeof(IServiceProvider))
                     .ToDictionary(m => m.GetCustomAttribute<JobAttribute>()!.Name);
 
-                var inDb = (await db.GetJobsAsync()).Select(j => j.Name);
+                var inDb = (await db.GetAllAsync<JobModel>());
 
-                var missingInDb = _methods.Keys.Except(inDb);
-                var missingInCode = inDb.Except(_methods.Keys);
+                var missingInDb = _methods.Keys.Except(inDb.Select(j => j.Name));
 
                 foreach (var name in missingInDb)
                 {
-                    await db.UpsertJobAsync(new Models.JobModel()
+                    await db.UpsertJobAsync(new JobModel()
                     {
                         Name = name,
                         Enabled = true,
                         Interval = TimeSpan.FromSeconds(10),
                         LastRunUtc = DateTime.MinValue,
                         RepeatOnError = true,
+                        Running = false,
                     });
                 }
 
-                foreach (var name in missingInCode)
+                foreach (var job in inDb)
                 {
-                    await db.DeleteJobAsync(name);
+                    if (_methods.ContainsKey(job.Name))
+                        await db.UpsertJobAsync(job with { Running = false });
+                    else
+                        await db.DeleteJobAsync(job.Name);
                 }
             });
         }
@@ -53,6 +56,7 @@ namespace LennyBOTv3.Services
         public Task GetJob(string name, DateTime utcNow)
         {
             var logger = _loggerFactory.CreateLogger("job " + name);
+            logger.LogDebug("{utcNow}", utcNow);
             return (Task)_methods[name].Invoke(null, new object?[] { utcNow, logger, _serviceProvider })!;
         }
 

@@ -10,5 +10,6 @@ namespace LennyBOTv3.Models
         public TimeSpan Interval { get; init; }
         public bool Enabled { get; init; }
         public bool RepeatOnError { get; init; }
+        public bool Running { get; init; }
     }
 }

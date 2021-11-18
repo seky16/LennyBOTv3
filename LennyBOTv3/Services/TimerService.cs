@@ -36,34 +36,27 @@ namespace LennyBOTv3.Services
         private async void Tick(object? o)
         {
             var token = o as CancellationToken? ?? CancellationToken.None;
-            using (await _lock.LockAsync(token))
+            var utcNow = DateTime.UtcNow;
+            var jobs = await Database.GetJobsAsync(utcNow);
+            var tasks = jobs.ToDictionary(j => _jobFactory.GetJob(j.Name, utcNow));
+            while (tasks.Count > 0)
             {
-                var utcNow = DateTime.UtcNow;
-                var jobs = await Database.GetJobsAsync();
-                foreach (var job in jobs)
+                var t = await Task.WhenAny(tasks.Keys);
+                var job = tasks[t];
+                tasks.Remove(t);
+                var enabled = true;
+                try { await t; }
+                catch (OperationCanceledException) { }
+                catch (Exception ex)
                 {
-                    _logger.LogTrace("{job}", job);
-                    if (job.Enabled && job.LastRunUtc.Add(job.Interval) <= utcNow)
+                    _logger.LogError(ex, "Job '{name}' threw exception", job.Name);
+                    if (!job.RepeatOnError)
                     {
-                        var enabled = true;
-                        _logger.LogDebug("Running job '{name}'", job.Name);
-                        var jobTask = _jobFactory.GetJob(job.Name, utcNow);
-                        try
-                        {
-                            await jobTask;
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Job '{name}' threw exception", job.Name);
-                            if (!job.RepeatOnError)
-                            {
-                                enabled = false;
-                                _logger.LogInformation("Disabling job '{jobName}'", job.Name);
-                            }
-                        }
-                        await Database.UpsertJobAsync(job with { LastRunUtc = utcNow, Enabled = enabled });
+                        enabled = false;
+                        _logger.LogInformation("Disabling job '{jobName}'", job.Name);
                     }
                 }
+                await Database.UpsertJobAsync(job with { Running = false, Enabled = enabled });
             }
         }
     }

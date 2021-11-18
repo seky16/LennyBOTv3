@@ -93,8 +93,16 @@ namespace LennyBOTv3.Services
         public Task DeleteJobAsync(string name)
             => Task.Run(() => _db.GetCollection<JobModel>().Delete(name));
 
-        public Task<List<JobModel>> GetJobsAsync()
-            => GetAllAsync<JobModel>();
+        public Task<List<JobModel>> GetJobsAsync(DateTime utcNow)
+            => Task.Run(async () =>
+            {
+                var jobs = (await GetAllAsync<JobModel>()).Where(j => j.Enabled && !j.Running && j.LastRunUtc.Add(j.Interval) <= utcNow);
+                var newJobs = jobs.Select(j => j with { LastRunUtc = utcNow, Running = true }).ToList();
+                var upserts = newJobs.Select(j => UpsertJobAsync(j));
+                await Task.WhenAll(upserts);
+
+                return newJobs;
+            });
 
         public Task UpsertJobAsync(JobModel jobModel)
             => Task.Run(() => _db.GetCollection<JobModel>().Upsert(jobModel));
