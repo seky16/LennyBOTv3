@@ -25,6 +25,9 @@ namespace LennyBOTv3.Services
             base.Dispose();
         }
 
+        public Task<List<T>> GetAllAsync<T>()
+            => Task.Run(() => _db.GetCollection<T>().FindAll().ToList());
+
         public Task<string> RunQueryAsync(string query)
         {
             return Task.Run(() =>
@@ -41,8 +44,6 @@ namespace LennyBOTv3.Services
                 return sb.ToString();
             });
         }
-        public Task<List<T>> GetAllAsync<T>()
-            => Task.Run(() => _db.GetCollection<T>().FindAll().ToList());
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {

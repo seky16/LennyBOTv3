@@ -12,7 +12,7 @@
         public string GetTopic(DateTime utcNow)
         {
             var eta = (utcNow - DateTimeUtc).TotalDays;
-            return Text?.Replace("{eta}", eta.ToString("N0")) ?? string.Empty;
+            return Text?.Replace("{eta}", (eta > 0 ? "+" : "") + eta.ToString("N0")) ?? string.Empty;
         }
     }
 }

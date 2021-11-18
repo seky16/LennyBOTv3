@@ -5,9 +5,9 @@ namespace LennyBOTv3.Services
 {
     public class JobFactory
     {
-        private Dictionary<string, MethodInfo> _methods;
-        private readonly IServiceProvider _serviceProvider;
         private readonly ILoggerFactory _loggerFactory;
+        private readonly IServiceProvider _serviceProvider;
+        private Dictionary<string, MethodInfo> _methods;
 
         public JobFactory(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
@@ -21,7 +21,7 @@ namespace LennyBOTv3.Services
                 _methods = Assembly.GetExecutingAssembly().GetTypes().SelectMany(t => t.GetMethods())
                     .Where(m => m.GetCustomAttributes<JobAttribute>().Any() && m.ReturnType == typeof(Task)
                         && m.IsStatic && m.GetParameters().Length == 3 && m.GetParameters()[0].ParameterType == typeof(DateTime)
-                        && m.GetParameters()[1].ParameterType == typeof(ILogger) && m.GetParameters()[2].ParameterType==typeof(IServiceProvider))
+                        && m.GetParameters()[1].ParameterType == typeof(ILogger) && m.GetParameters()[2].ParameterType == typeof(IServiceProvider))
                     .ToDictionary(m => m.GetCustomAttribute<JobAttribute>()!.Name);
 
                 var inDb = (await db.GetJobsAsync()).Select(j => j.Name);
@@ -74,10 +74,16 @@ namespace LennyBOTv3.Services
             {
                 var channel = await discordClient.GetChannelAsync(desc.ChannelId);
 
-                if (channel == null)
+                if (channel is null)
                     continue;
 
+                var topic = desc.GetTopic(utcNow);
 
+                if (string.Equals(channel.Topic, topic))
+                    continue;
+
+                logger.LogInformation("Changing {channel} topic to '{topic}'", channel, topic);
+                await channel.ModifyAsync(c => c.Topic = topic);
             }
         }
 
@@ -96,5 +102,6 @@ namespace LennyBOTv3.Services
 
         public string Name { get; }
     }
+
     #endregion
 }
