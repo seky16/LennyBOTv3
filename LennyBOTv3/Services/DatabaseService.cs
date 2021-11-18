@@ -12,7 +12,7 @@ namespace LennyBOTv3.Services
 
         public DatabaseService()
         {
-            _db = new("LennyBOTv3.db");
+            _db = new("Files/LennyBOTv3.db");
             _db.Mapper.EnumAsInteger = true;
             _db.UtcDate = true;
         }
@@ -44,6 +44,9 @@ namespace LennyBOTv3.Services
                 return sb.ToString();
             });
         }
+
+        public Task UpsertAsync<T>(T model)
+                    => Task.Run(() => _db.GetCollection<T>().Upsert(model));
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
