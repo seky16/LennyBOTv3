@@ -7,10 +7,12 @@
         protected LennyBackgroundService(IServiceProvider serviceProvider)
         {
             Logger = serviceProvider.GetRequiredService<ILogger<T>>();
+            ServiceProvider = serviceProvider;
         }
 
         public Task Initialized => Init.Task;
 
+        protected IServiceProvider ServiceProvider { get; }
         protected ILogger<T> Logger { get; }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
