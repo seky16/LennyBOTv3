@@ -33,5 +33,5 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
-        source: "/home/runner/work/LennyBOTv3/LennyBOTv3/LennyBOTv3/bin/Release/net6.0/ubuntu.16.04-x64/publish/*"
+        source: "."
         target: "/home/seky16/LennyBOTv3"
