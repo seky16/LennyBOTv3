@@ -2,12 +2,12 @@
 {
     public record ChannelDescriptionModel
     {
+        public DateTime DateTimeUtc { get; init; }
+
         [LiteDB.BsonId]
         public ulong ChannelId { get; init; }
 
         public string? Text { get; init; }
-
-        public DateTime DateTimeUtc { get; init; }
 
         public string GetTopic(DateTime utcNow)
         {

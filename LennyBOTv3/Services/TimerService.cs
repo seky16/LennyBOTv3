@@ -1,6 +1,4 @@
-﻿using Nito.AsyncEx;
-
-namespace LennyBOTv3.Services
+﻿namespace LennyBOTv3.Services
 {
     public class TimerService : LennyBackgroundService<TimerService>
     {
@@ -14,8 +12,6 @@ namespace LennyBOTv3.Services
             _jobFactory = jobFactory;
         }
 
-        private DatabaseService Database => _serviceProvider.GetHostedService<DatabaseService>();
-
         public override void Dispose()
         {
             _dispatcher?.Change(Timeout.Infinite, Timeout.Infinite);
@@ -27,8 +23,8 @@ namespace LennyBOTv3.Services
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await _serviceProvider.GetHostedService<Bot>().Initialized;
-            Init.SetResult();
             _dispatcher = new(Tick, stoppingToken, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+            await base.ExecuteAsync(stoppingToken);
         }
 
         private async void Tick(object? o)

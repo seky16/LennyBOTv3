@@ -75,8 +75,8 @@ namespace LennyBOTv3
 
             double n = upvotes + downvotes;
             var pHat = upvotes / n;
-            var z = 1.96; // 0.95 confidentiality
-            return (pHat + z * z / (2 * n) - z * Math.Sqrt((pHat * (1 - pHat) + z * z / (4 * n)) / n)) / (1 + z * z / n);
+            const double Z = 1.96; // 0.95 confidentiality
+            return (pHat + (Z * Z / (2 * n)) - (Z * Math.Sqrt(((pHat * (1 - pHat)) + (Z * Z / (4 * n))) / n))) / (1 + (Z * Z / n));
         }
 
         public class Shuffler<T> : IComparer<T>

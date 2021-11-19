@@ -42,8 +42,11 @@ namespace LennyBOTv3.Services
             });
         }
 
+        public Task UpdateAsync<T>(T model)
+            => Task.Run(() => { if (!_db.GetCollection<T>().Update(model)) Logger.LogWarning("{method}: {model} not found", nameof(UpdateAsync), model); });
+
         public Task UpsertAsync<T>(T model)
-                    => Task.Run(() => _db.GetCollection<T>().Upsert(model));
+            => Task.Run(() => { if (_db.GetCollection<T>().Upsert(model)) Logger.LogDebug("Inserting {model}", model); });
 
         #region Settings
 

@@ -16,7 +16,7 @@ namespace LennyBOTv3.Modules
             _rss = rss;
         }
 
-        [Command("add")]
+        [Command("add"), Priority(1)]
         [Description("")]
         public async Task RssAddAsync(CommandContext ctx,
             [Description("")] Uri url,
@@ -26,6 +26,13 @@ namespace LennyBOTv3.Modules
             await _rss.AddFeed(url, channel ?? ctx.Channel, name ?? url.Host);
             await ctx.MarkSuccessAsync();
         }
+
+        [Command("add")]
+        [Description("")]
+        public Task RssAddAsync(CommandContext ctx,
+            [Description("")] Uri url,
+            [RemainingText, Description("")] string? name = null)
+            => RssAddAsync(ctx, url, null, name);
 
         [Command("list")]
         [Description("")]

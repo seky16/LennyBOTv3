@@ -66,6 +66,7 @@ namespace LennyBOTv3
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await DiscordClient.ConnectAsync();
+            await Task.Delay(-1, stoppingToken);
         }
 
         private async Task CommandsNext_CommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)

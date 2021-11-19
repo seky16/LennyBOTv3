@@ -36,7 +36,7 @@ namespace LennyBOTv3.Services
                     {
                         Name = name,
                         Enabled = true,
-                        Interval = TimeSpan.FromSeconds(10),
+                        Interval = TimeSpan.FromMinutes(1),
                         LastRunUtc = DateTime.MinValue,
                         RepeatOnError = true,
                         Running = false,

@@ -2,11 +2,11 @@
 {
     public record FrogMessageModel
     {
-        [LiteDB.BsonId]
-        public ulong UserId { get; init; }
+        public DateTime LastSendUtc { get; init; }
 
         public DateTime TimeUtc { get; init; }
 
-        public DateTime LastSendUtc { get; init; }
+        [LiteDB.BsonId]
+        public ulong UserId { get; init; }
     }
 }

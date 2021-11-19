@@ -1,15 +1,23 @@
-﻿using System.Text;
+﻿using System.ServiceModel.Syndication;
+using System.Text;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
+using Force.Crc32;
 using SkiaSharp;
 
 namespace LennyBOTv3
 {
     public static class Extensions
     {
+        public static void Deconstruct<TKey, TElement>(this IGrouping<TKey, TElement> group, out TKey key, out IEnumerable<TElement> enumerable)
+        {
+            key = group.Key;
+            enumerable = group.AsEnumerable();
+        }
+
         // https://social.msdn.microsoft.com/Forums/en-US/fcab7650-18ff-4365-8ef6-f509c0688d0c/drawtext-multiline?forum=xamarinlibraries
         public static void DrawText(this SKCanvas canvas, string text, SKRect area, SKPaint paint)
         {
@@ -56,6 +64,14 @@ namespace LennyBOTv3
                     => serviceProvider.GetServices<IHostedService>().OfType<TService>().Single();
 
         public static string GetNickname(this DiscordUser user) => (user as DiscordMember)?.Nickname ?? user.Username;
+
+        public static DateTime GetTimestampUtc(this SyndicationItem syndicationItem)
+            => syndicationItem.LastUpdatedTime > syndicationItem.PublishDate ? syndicationItem.LastUpdatedTime.UtcDateTime : syndicationItem.PublishDate.UtcDateTime;
+
+        public static uint Checksum(this string str)
+        {
+            return Crc32Algorithm.Compute(Encoding.UTF8.GetBytes(str));
+        }
 
         public static bool ImplementsInterface(this Type type, Type @interface)
         {
