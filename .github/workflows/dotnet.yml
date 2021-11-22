@@ -25,8 +25,8 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal -c Release
     - name: Publish
-      run: dotnet publish -r ubuntu.16.04-x64 -c Release
-    - name: copy file via scp
+      run: dotnet publish -r ubuntu.16.04-x64 -c Release --self-contained true --nologo
+    - name: Deploy (SCP)
       uses: appleboy/scp-action@master
       with:
         host: ${{ secrets.HOST }}

@@ -1,4 +1,6 @@
-﻿namespace LennyBOTv3.Services
+﻿using LennyBOTv3.Models;
+
+namespace LennyBOTv3.Services
 {
     public class TimerService : LennyBackgroundService<TimerService>
     {
@@ -29,14 +31,22 @@
 
         private async void Tick(object? o)
         {
-            var token = o as CancellationToken? ?? CancellationToken.None;
             var utcNow = DateTime.UtcNow;
             var jobs = await Database.GetJobsAsync(utcNow);
-            var tasks = jobs.ToDictionary(j => _jobFactory.GetJob(j.Name, utcNow));
+
+            var taskToJob = new Dictionary<int, JobModel>();
+            var tasks = new List<Task>();
+            foreach (var job in jobs)
+            {
+                var task = _jobFactory.GetJob(job.Name, utcNow);
+                taskToJob[task.Id] = job;
+                tasks.Add(task);
+            }
+
             while (tasks.Count > 0)
             {
-                var t = await Task.WhenAny(tasks.Keys);
-                var job = tasks[t];
+                var t = await Task.WhenAny(tasks);
+                var job = taskToJob[t.Id];
                 tasks.Remove(t);
                 var enabled = true;
                 try { await t; }
