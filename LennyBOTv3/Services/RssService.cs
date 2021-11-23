@@ -63,7 +63,7 @@ namespace LennyBOTv3.Services
                         continue;
 
                     var channel = await client.GetChannelAsync(feed.ChannelId);
-                    logger.LogInformation("Posting {count} items from {feed} to {channel}", items.Count, url, channel);
+                    var count = 0;
                     foreach (var item in items)
                     {
                         if (item.Id.Equals(feed.LastItemId))
@@ -71,7 +71,11 @@ namespace LennyBOTv3.Services
 
                         var (content, embed) = GetPost(feed, item);
                         tasks.Add(channel.SendMessageAsync(content, embed));
+                        count++;
                     }
+
+                    if (count > 0)
+                        logger.LogInformation("Posting {count} items from {feed} to {channel}", count, url, channel);
 
                     var lastUpdatedUtc = rss.LastUpdatedTime == default(DateTimeOffset) ? (DateTime?)null : rss.LastUpdatedTime.UtcDateTime;
                     var newFeed = feed with { LastUpdatedUtc = lastUpdatedUtc, LastItemId = items[0].Id };
@@ -151,6 +155,6 @@ namespace LennyBOTv3.Services
             }
         }
 
-        #endregion
+        #endregion CheckRssFeeds
     }
 }
