@@ -63,9 +63,10 @@ namespace LennyBOTv3.Services
         public async Task<IEnumerable<DiscordEmbedBuilder>> StocksAsync(string symbol)
         {
             var pages = new List<DiscordEmbedBuilder>();
+            var results = await _alpacaData.GetHistoricalBarsAsAsyncEnumerable(new HistoricalBarsRequest(symbol,
+                DateTime.UtcNow.AddDays(-7), DateTime.UtcNow.AddMinutes(-15), BarTimeFrame.Day)).ToListAsync();
 
-            await foreach (var bar in _alpacaData.GetHistoricalBarsAsAsyncEnumerable(new HistoricalBarsRequest(symbol,
-                DateTime.UtcNow.AddDays(-7), DateTime.UtcNow.AddMinutes(-15), BarTimeFrame.Day)))
+            foreach (var bar in results)
             {
                 pages.Add(new DiscordEmbedBuilder()
                     .WithAuthor("Alpaca", "https://alpaca.markets/", "https://files.alpaca.markets/webassets/apple-touch-icon.png")
