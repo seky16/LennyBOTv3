@@ -85,7 +85,7 @@ namespace LennyBOTv3.Services
 
         private static (string? Content, DiscordEmbedBuilder? Embed) GetPost(RssFeedModel feed, SyndicationItem item)
         {
-            var uri = item.Links.FirstOrDefault(x => x.RelationshipType.Equals("self", StringComparison.InvariantCultureIgnoreCase))?.Uri;
+            var uri = item.Links.FirstOrDefault(x => string.Equals(x.RelationshipType, "self", StringComparison.InvariantCultureIgnoreCase))?.Uri;
 
             if (uri is not null)
             {
