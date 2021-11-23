@@ -89,19 +89,22 @@ namespace LennyBOTv3.Services
 
         private static (string? Content, DiscordEmbedBuilder? Embed) GetPost(RssFeedModel feed, SyndicationItem item)
         {
-            var uri = item.Links.FirstOrDefault(x => string.Equals(x.RelationshipType, "self", StringComparison.InvariantCultureIgnoreCase))?.Uri;
+            var selfUrl = item.Links.FirstOrDefault(x => string.Equals(x.RelationshipType, "self", StringComparison.InvariantCultureIgnoreCase))?.Uri;
 
-            if (uri is not null)
+            if (selfUrl is not null)
             {
-                return (uri.OriginalString, null);
+                return (selfUrl.OriginalString, null);
             }
             else
             {
+                var postUrl = item.Links.FirstOrDefault(x => string.Equals(x.RelationshipType, "alternate", StringComparison.InvariantCultureIgnoreCase))?.Uri
+                    ?? item.Links.FirstOrDefault(x => x.Uri != null)?.Uri;
                 var conv = new CustomConverter();
                 var summary = conv.Convert(item.Summary?.Text ?? string.Empty);
                 var content = conv.Convert((item.Content as TextSyndicationContent)?.Text ?? string.Empty);
                 var embed = new DiscordEmbedBuilder()
                     .WithTitle(item.Title.Text)
+                    .WithUrl(postUrl)
                     .WithDescription((!string.IsNullOrWhiteSpace(summary) ? summary : content).Truncate(1024))
                     .WithTimestamp(item.GetTimestampUtc())
                     .WithAuthor(feed.Name, feed.Url)
