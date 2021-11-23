@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using LennyBOTv3.Models;
 using LiteDB;
@@ -25,20 +26,30 @@ namespace LennyBOTv3.Services
         public Task<List<T>> GetAllAsync<T>()
             => Task.Run(() => _db.GetCollection<T>().FindAll().ToList());
 
-        public Task<string> RunQueryAsync(string query)
+        public Task<List<DiscordEmbedBuilder>> RunQueryAsync(string query)
         {
             return Task.Run(() =>
             {
                 var reader = _db.Execute(query);
-                var sb = new StringBuilder();
+                var result = new List<DiscordEmbedBuilder>();
+                var list = reader.ToList();
+                var vals = list.OfType<BsonDocument>().SelectMany(d => d.Values).OfType<BsonArray>().Where(a => a.Any()).SelectMany(x => x);
+                if (!vals.Any())
+                    vals = list;
 
-                foreach (var item in reader.ToEnumerable())
+                if (!vals.Any())
+                    return new() { new DiscordEmbedBuilder().WithTitle("No results") };
+                var count = vals.Count();
+                for (var i = 0; i < count; i++)
                 {
+                    var item = vals.ElementAt(i);
+                    var sb = new StringBuilder();
                     using var strWriter = new StringWriter(sb);
                     var jsonWriter = new JsonWriter(strWriter) { Pretty = true, };
                     jsonWriter.Serialize(item);
+                    result.Add(new DiscordEmbedBuilder().WithTitle($"Result {i + 1}/{count}").WithDescription(Formatter.BlockCode(sb.ToString(), "json")));
                 }
-                return sb.ToString();
+                return result;
             });
         }
 

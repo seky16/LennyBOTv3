@@ -29,10 +29,7 @@ namespace LennyBOTv3.Modules
         [Command("sql"), Aliases("db")]
         public async Task SqlAsync(CommandContext ctx,
             [RemainingText, Description("")] string query)
-        {
-            var result = await Database.RunQueryAsync(query);
-            await ctx.RespondAsync(Formatter.BlockCode(result, "json"));
-        }
+            => await ctx.SendPaginatedMessageAsync(await Database.RunQueryAsync(query));
 
         [Command("sudo"), Description("Executes a command as another user.")]
         public async Task SudoAsync(CommandContext ctx,
