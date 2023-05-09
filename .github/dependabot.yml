@@ -1,0 +1,22 @@
+version: 2
+updates:
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    labels:
+    - "Dependabot"
+    - "dependencies"
+    commit-message:
+      prefix: "[Dependabot] "
+  # Maintain dependencies for NuGet packages
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+    - "Dependabot"
+    - "dependencies"
+    commit-message:
+      prefix: "[Dependabot] "
