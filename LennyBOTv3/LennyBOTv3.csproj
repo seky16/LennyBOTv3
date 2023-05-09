@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+<Project Sdk="Microsoft.NET.Sdk.Worker">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -41,7 +41,7 @@
     <PackageReference Include="Alpaca.Markets.Extensions" Version="6.0.1-alpha3" />
     <PackageReference Include="Crc32.NET" Version="1.2.0" />
     <PackageReference Include="FixerSharp" Version="1.2.2" />
-    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.55.0.2449" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.60.0.3043" />
     <PackageReference Include="LiteDB" Version="5.0.11" />
     <PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
     <PackageReference Include="OmdbApiNet" Version="1.3.0" />
