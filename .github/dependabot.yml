@@ -7,7 +7,6 @@ updates:
       interval: "daily"
     labels:
     - "Dependabot"
-    - "dependencies"
     commit-message:
       prefix: "[Dependabot] "
   # Maintain dependencies for NuGet packages
@@ -17,6 +16,5 @@ updates:
       interval: "weekly"
     labels:
     - "Dependabot"
-    - "dependencies"
     commit-message:
       prefix: "[Dependabot] "
