@@ -146,7 +146,7 @@ namespace LennyBOTv3
 
         private Task Discord_Ready(DiscordClient sender, ReadyEventArgs e)
         {
-            sender.Logger.LogInformation("Client is ready to process events");
+            sender.Logger.LogInformation($"Client is ready to process events (responding to '{_discordSettings.Prefix}' prefix)");
             return Task.CompletedTask;
         }
 
