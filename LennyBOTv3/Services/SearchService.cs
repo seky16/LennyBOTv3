@@ -49,7 +49,7 @@ namespace LennyBOTv3.Services
                     .WithColor(DiscordColor.Goldenrod)
                     .WithTitle($"{item.Title} ({item.Year})")
                     .WithDescription($"{item.Plot} ({item.Runtime})")
-                    .WithUrl($"https://www.imdb.com/title/{ item.ImdbId}")
+                    .WithUrl($"https://www.imdb.com/title/{item.ImdbId}")
                     .WithImageUrl(item.Poster)
                     .AddField("Rating", $"{item.ImdbRating}\nMetascore: {item.Metascore}")
                     .AddField("Info", $"Director: {item.Director}\nWriter: {item.Writer}\nCast: {item.Actors}\nGenre: {item.Genre}\nCountry: {item.Country}")
