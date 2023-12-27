@@ -29,7 +29,7 @@ jobs:
     - name: Deploy (SCP)
       # only deploy from merged master
       if: ${{ github.ref == 'refs/heads/master' }}
-      uses: appleboy/scp-action@v0.1.5
+      uses: appleboy/scp-action@v0.1.6
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
