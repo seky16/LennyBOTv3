@@ -16,19 +16,12 @@
     <AssemblyTitle>LennyBOTv3</AssemblyTitle>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <DSP-Version>4.2.0-nightly-*</DSP-Version>
-    <RestoreAdditionalProjectSources>
-      https://nuget.emzi0767.com/api/v3/index.json
-    </RestoreAdditionalProjectSources>
-  </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="$(DSP-Version)" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="$(DSP-Version)" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="$(DSP-Version)" />
-    <PackageReference Include="DSharpPlus.Lavalink" Version="$(DSP-Version)" />
-    <PackageReference Include="DSharpPlus.SlashCommands" Version="$(DSP-Version)" />
+    <PackageReference Include="DSharpPlus" Version="4.5.0" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.5.0" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.5.0" />
+    <PackageReference Include="DSharpPlus.Lavalink" Version="4.5.0" />
+    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>
