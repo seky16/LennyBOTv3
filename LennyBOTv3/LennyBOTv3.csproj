@@ -31,8 +31,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Alpaca.Markets" Version="6.2.5" />
-    <PackageReference Include="Alpaca.Markets.Extensions" Version="6.2.2" />
+    <PackageReference Include="Alpaca.Markets" Version="7.1.0" />
+    <PackageReference Include="Alpaca.Markets.Extensions" Version="7.1.0" />
     <PackageReference Include="Crc32.NET" Version="1.2.0" />
     <PackageReference Include="FixerSharp" Version="1.2.2" />
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.64.0.3205" />
